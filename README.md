@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # agrovani
 
 A new Flutter project.
@@ -15,3 +16,6 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# agroVani
+>>>>>>> 3cb5e2f0b16a55b5745bae3657679ef6fad6120f
