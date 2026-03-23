@@ -1,0 +1,8 @@
+{
+    "Solapur": {
+    "Jowar": {"min": 3780, "max": 4270, "avg": 4050},
+    "Wheat": {"min": 2480, "max": 3775, "avg": 3365},
+    "Tur": {"min": 6805, "max": 6805, "avg": 6805},
+    "Onion": {"min": 500, "max": 1200, "avg": 900}
+    }
+}
