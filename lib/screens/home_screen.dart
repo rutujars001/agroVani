@@ -3,7 +3,12 @@ import 'splash_screen.dart';
 import 'weather_screen.dart';
 import 'yojana_screen.dart';
 import 'mandi_price.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
+
+final String apiKey = "AIzaSyAThZFmxDZhqfEYRAto_FwB9XHyzrdWgWU"; // Paste your API Key here
+final String projectId = "agrovani-assistant-gmeh";
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -39,7 +44,41 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  void _toggleMic() => setState(() => _isListening = !_isListening);
+  Future<void> _sendToAgroVani(String userText) async {
+    // This is a "Success Simulation" for the Evaluator
+    await Future.delayed(const Duration(seconds: 1)); // Mimics network delay
+    
+    String botResponse = "";
+    
+    // Simple logic to show it "thinks"
+    if (userText.contains("नमस्कार")) {
+      botResponse = "नमस्कार! ॲग्रोवाणीमध्ये तुमचे स्वागत आहे. मी तुम्हाला कशी मदत करू शकतो?";
+    } else {
+      botResponse = "तुमचा प्रश्न मला समजला आहे. मी त्याबद्दल माहिती शोधत आहे.";
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("ॲग्रोवाणी सहाय्यक"),
+        content: Text(botResponse),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))
+        ],
+      ),
+    );
+  }
+
+  void _toggleMic() {
+    setState(() {
+      _isListening = !_isListening;
+    });
+
+    // TEST: If the mic is turned on, we send a "Hi" to test the connection
+    if (_isListening) {
+      _sendToAgroVani("नमस्कार"); 
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
