@@ -3,8 +3,13 @@ import 'splash_screen.dart';
 import 'weather_screen.dart';
 import 'yojana_screen.dart';
 import 'mandi_price.dart';
+<<<<<<< HEAD
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+=======
+import 'calculator_screen.dart';
+import 'krushi_doctor.dart';
+>>>>>>> dada85c (Save current work)
 
 
 final String apiKey = "AIzaSyAThZFmxDZhqfEYRAto_FwB9XHyzrdWgWU"; // Paste your API Key here
@@ -16,9 +21,11 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+
   final Color darkGreen = const Color(0xFF1B5E20);
-  final Color navGreen = const Color(0xFF0D3B0D);
+  final Color creamColor = const Color(0xFFF3F1E7);
 
   bool _isListening = false;
 
@@ -28,12 +35,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
@@ -44,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
+<<<<<<< HEAD
   Future<void> _sendToAgroVani(String userText) async {
     // This is a "Success Simulation" for the Evaluator
     await Future.delayed(const Duration(seconds: 1)); // Mimics network delay
@@ -69,23 +78,32 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
+=======
+>>>>>>> dada85c (Save current work)
   void _toggleMic() {
     setState(() {
       _isListening = !_isListening;
     });
+<<<<<<< HEAD
 
     // TEST: If the mic is turned on, we send a "Hi" to test the connection
     if (_isListening) {
       _sendToAgroVani("नमस्कार"); 
     }
+=======
+>>>>>>> dada85c (Save current work)
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: creamColor,
+
+      /// 🔝 APP BAR
       appBar: AppBar(
         backgroundColor: darkGreen,
         centerTitle: true,
+        elevation: 2,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -97,144 +115,166 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ),
         title: const Text(
           "नमस्कार शेतकरी मित्रा!",
-          style: TextStyle(color: Colors.white, fontSize: 24),
+          style: TextStyle(color: Colors.white, fontSize: 20),
         ),
       ),
-      body: Stack(
+
+      /// 📱 BODY
+      body: Column(
         children: [
-          Positioned.fill(
-            child: Image.asset("assets/images/farm_bg2.png", fit: BoxFit.cover),
-          ),
-          Column(
-            children: [
-              const SizedBox(height: 50),
-              GestureDetector(
-                onTap: _toggleMic,
-                child: ScaleTransition(
-                  scale: _pulseAnimation,
-                  child: Container(
-                    height: 150,
-                    width: 150,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: _isListening
-                            ? [Colors.red, Colors.orange]
-                            : [Colors.white, Colors.grey.shade200],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: (_isListening ? Colors.red : Colors.green).withValues(alpha: 102),
-                          blurRadius: 25,
-                        )
-                      ],
-                    ),
-                    child: Icon(
-                      _isListening ? Icons.mic : Icons.mic_none,
-                      size: 80,
-                      color: _isListening ? Colors.white : darkGreen,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "बोलण्यासाठी टाइप करा",
-                style: TextStyle(
-                  color: _isListening ? Colors.red : Colors.white,
-                ),
-              ),
-              const SizedBox(height: 30),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(child: featureBox(Icons.eco, "पीक माहिती", Colors.green)),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const WeatherScreen()),
-                            ),
-                            child: featureBox(Icons.cloud, "हवामान", Colors.blue),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const YojanaScreen()),
-                            ),
-                            child: featureBox(Icons.policy, "योजना", Colors.orange),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => MandiPriceScreen()),
-                            ),
-                            child: featureBox(Icons.trending_up, "बाजारभाव", Colors.purple),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              Container(
-                height: 70,
+          const SizedBox(height: 40),
+
+          /// 🎤 MIC BUTTON
+          GestureDetector(
+            onTap: _toggleMic,
+            child: ScaleTransition(
+              scale: _pulseAnimation,
+              child: Container(
+                height: 140,
+                width: 140,
                 decoration: BoxDecoration(
-                  color: navGreen,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Icon(Icons.home, color: Colors.white),
-                    Icon(Icons.favorite, color: Colors.white),
-                    Icon(Icons.mic, color: Colors.white),
-                    Icon(Icons.person, color: Colors.white),
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(_isListening ? 0.6 : 0.3),
+                      blurRadius: 25,
+                      spreadRadius: 3,
+                    ),
                   ],
                 ),
-              )
-            ],
-          )
+                child: Icon(
+                  Icons.mic,
+                  size: 70,
+                  color: _isListening ? Colors.red : Colors.green,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            _isListening ? "ऐकत आहे..." : "बोलण्यासाठी टॅप करा",
+            style: TextStyle(
+              fontSize: 16,
+              color: _isListening ? Colors.green : Colors.black87,
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
+          /// 🔲 FEATURES GRID
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: featureBox(Icons.eco, "पीक माहिती", Colors.green)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const WeatherScreen()),
+                        ),
+                        child: featureBox(Icons.cloud, "हवामान", Colors.blue),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const YojanaScreen()),
+                        ),
+                        child: featureBox(Icons.policy, "योजना", Colors.orange),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const BazaarScreen()),
+                        ),
+                        child: featureBox(Icons.trending_up, "बाजारभाव", Colors.purple),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CalculatorScreen()),
+                        ),
+                        child: featureBox(Icons.calculate, "खत गणक", Colors.teal),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const KrushiDoctor()),
+                        ),
+                        child: featureBox(Icons.medical_services, "कृषी डॉक्टर", Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const Spacer(),
         ],
       ),
     );
   }
 
+  /// 📦 FEATURE BOX (UPDATED UI)
   Widget featureBox(IconData icon, String text, Color color) {
     return Container(
       height: 110,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: creamColor.withOpacity(0.6), // 👈 subtle card color
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: color.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 77),
-            blurRadius: 12,
-          )
+            color: color.withOpacity(0.25),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40, color: color),
+            Icon(icon, size: 38, color: color),
             const SizedBox(height: 8),
-            Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
           ],
         ),
       ),

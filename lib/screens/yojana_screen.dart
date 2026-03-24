@@ -9,34 +9,33 @@ class YojanaScreen extends StatefulWidget {
 
 class _YojanaScreenState extends State<YojanaScreen> {
   final Color darkGreen = const Color(0xFF2E7D32);
+  final Color creamColor = const Color(0xFFF3F1E7);
 
   final List<Map<String, String>> yojanaList = [
     {
       "title": "प्रधानमंत्री किसान योजना",
       "subtitle": "₹6000 वार्षिक मदत",
       "details":
-      "ही योजना लहान व मध्यम शेतकऱ्यांना दरवर्षी ₹6000 आर्थिक मदत देते. ही रक्कम थेट बँक खात्यात जमा होते.",
+      "ही योजना लहान व मध्यम शेतकऱ्यांना दरवर्षी ₹6000 आर्थिक मदत देते.",
       "image": "assets/images/yojana1.png"
     },
     {
       "title": "महाडीबीटी यांत्रिकीकरण",
       "subtitle": "ट्रॅक्टर व उपकरण अनुदान",
       "details":
-      "या योजनेद्वारे ट्रॅक्टर, शेती उपकरणे आणि यांत्रिकीकरणासाठी सरकारकडून अनुदान दिले जाते.",
+      "या योजनेद्वारे ट्रॅक्टर व उपकरणांसाठी अनुदान दिले जाते.",
       "image": "assets/images/yojana2.png"
     },
     {
       "title": "ठिबक सिंचन योजना",
       "subtitle": "सिंचनासाठी सबसिडी",
-      "details":
-      "ही योजना शेतकऱ्यांना ठिबक सिंचनासाठी आर्थिक मदत देते.",
+      "details": "ठिबक सिंचनासाठी आर्थिक मदत मिळते.",
       "image": "assets/images/yojana3.png"
     },
     {
       "title": "पीक विमा योजना",
-      "subtitle": "नुकसान भरपाई संरक्षण",
-      "details":
-      "नैसर्गिक आपत्तीमुळे झालेले नुकसान भरून काढण्यासाठी ही योजना मदत करते.",
+      "subtitle": "नुकसान भरपाई",
+      "details": "नैसर्गिक आपत्तीमुळे नुकसान भरपाई मिळते.",
       "image": "assets/images/yojana4.png"
     },
   ];
@@ -52,26 +51,31 @@ class _YojanaScreenState extends State<YojanaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green.shade100,
+      backgroundColor: creamColor, // ✅ UPDATED
+
       appBar: AppBar(
         backgroundColor: darkGreen,
+        elevation: 0,
         title: const Text("शासकीय योजना"),
         centerTitle: true,
       ),
+
       body: SingleChildScrollView(
         child: Column(
           children: [
+
             /// SEARCH BAR
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               child: TextField(
                 decoration: InputDecoration(
                   hintText: "योजना शोधा...",
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search, color: darkGreen),
                   filled: true,
                   fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(25),
                     borderSide: BorderSide.none,
                   ),
                 ),
@@ -80,27 +84,26 @@ class _YojanaScreenState extends State<YojanaScreen> {
 
             /// VOICE BUTTON
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12),
-              padding: const EdgeInsets.all(15),
+              margin: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: darkGreen,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+                borderRadius: BorderRadius.circular(12),
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.mic, color: Colors.white, size: 28),
-                  SizedBox(width: 10),
+                  Icon(Icons.mic, color: Colors.white, size: 24),
+                  SizedBox(width: 8),
                   Text(
                     "योजना विचारण्यासाठी बोला",
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 15),
+            const SizedBox(height: 10),
 
             /// YOJANA LIST
             ListView.builder(
@@ -112,78 +115,75 @@ class _YojanaScreenState extends State<YojanaScreen> {
               },
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
           ],
         ),
       ),
     );
   }
 
-  /// CARD UI
+  /// 📦 COMPACT CARD
   Widget buildCard(int index) {
     final item = yojanaList[index];
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          )
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// IMAGE TOP (FIXED HEIGHT)
+
+          /// 🔽 SMALL IMAGE
           ClipRRect(
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(18),
-              topRight: Radius.circular(18),
+              topLeft: Radius.circular(14),
+              topRight: Radius.circular(14),
             ),
             child: SizedBox(
-              height: 150, // fixed height
+              height: 110, // ✅ REDUCED HEIGHT
               width: double.infinity,
               child: Image.asset(
                 item["image"]!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[200],
-                    alignment: Alignment.center,
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      size: 50,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
+                errorBuilder: (_, __, ___) => Image.asset(
+                  "assets/images/placeholder.png",
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
 
-          /// TEXT CONTENT
+          /// TEXT
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10), // ✅ REDUCED
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// TITLE
                 Text(
                   item["title"]!,
-                  style: const TextStyle(
-                    fontSize: 17,
+                  style: TextStyle(
+                    fontSize: 15, // ✅ SMALLER
                     fontWeight: FontWeight.bold,
+                    color: darkGreen,
                   ),
                 ),
-
-                const SizedBox(height: 5),
-
-                /// SUBTITLE
+                const SizedBox(height: 3),
                 Text(
                   item["subtitle"]!,
-                  style: const TextStyle(color: Colors.black54),
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
 
                 /// BUTTONS
                 Row(
@@ -195,31 +195,30 @@ class _YojanaScreenState extends State<YojanaScreen> {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: darkGreen,
-                        side: BorderSide(color: darkGreen),
+                        backgroundColor: darkGreen,
+                        minimumSize: const Size(80, 32), // ✅ SMALL BUTTON
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                       ),
-                      child: const Text("अधिक वाचा"),
+                      child: const Text("वाचा", style: TextStyle(fontSize: 12)),
                     ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
+                    const SizedBox(width: 8),
+                    OutlinedButton(
                       onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: darkGreen,
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(80, 32),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                         side: BorderSide(color: darkGreen),
                       ),
-                      child: const Text("अर्ज करा"),
+                      child: Text("अर्ज", style: TextStyle(fontSize: 12, color: darkGreen)),
                     ),
                   ],
                 ),
 
-                /// DETAILS
                 if (expanded[index]) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Text(
                     item["details"]!,
-                    style: const TextStyle(fontSize: 14),
+                    style: const TextStyle(fontSize: 13),
                   ),
                 ],
               ],
