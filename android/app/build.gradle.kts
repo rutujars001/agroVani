@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.agrovani"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "25.0.8775105"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

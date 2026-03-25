@@ -1,231 +1,272 @@
 import 'package:flutter/material.dart';
+import '../utils/polly_tts.dart';
+import '../widgets/voice_mic_bar.dart';
 
 class YojanaScreen extends StatefulWidget {
   const YojanaScreen({super.key});
-
   @override
   State<YojanaScreen> createState() => _YojanaScreenState();
 }
 
 class _YojanaScreenState extends State<YojanaScreen> {
-  final Color darkGreen = const Color(0xFF2E7D32);
-  final Color creamColor = const Color(0xFFF3F1E7);
+  final PollyTts _tts = PollyTts();
+  final TextEditingController _search = TextEditingController();
+  final Set<String> _expanded = {};
 
-  final List<Map<String, String>> yojanaList = [
+  static const _green = Color(0xFF1B5E20);
+  static const _cream = Color(0xFFF3F1E7);
+
+  static const _yojanas = [
     {
-      "title": "प्रधानमंत्री किसान योजना",
-      "subtitle": "₹6000 वार्षिक मदत",
-      "details":
-      "ही योजना लहान व मध्यम शेतकऱ्यांना दरवर्षी ₹6000 आर्थिक मदत देते.",
-      "image": "assets/images/yojana1.png"
+      'title': 'प्रधानमंत्री किसान योजना',
+      'subtitle': '₹6000 वार्षिक थेट मदत',
+      'icon': '🌾',
+      'color': Color(0xFF2E7D32),
+      'details': 'पात्रता: 2 हेक्टरपर्यंत जमीन असलेले शेतकरी.\n'
+          'लाभ: दरवर्षी ₹6000 तीन हप्त्यांत थेट बँक खात्यात.\n'
+          'अर्ज: pmkisan.gov.in वर ऑनलाइन किंवा CSC केंद्रावर.\n'
+          'कागदपत्रे: आधार, बँक पासबुक, जमीन उतारा.',
     },
     {
-      "title": "महाडीबीटी यांत्रिकीकरण",
-      "subtitle": "ट्रॅक्टर व उपकरण अनुदान",
-      "details":
-      "या योजनेद्वारे ट्रॅक्टर व उपकरणांसाठी अनुदान दिले जाते.",
-      "image": "assets/images/yojana2.png"
+      'title': 'महाडीबीटी यांत्रिकीकरण',
+      'subtitle': 'ट्रॅक्टर व उपकरण अनुदान',
+      'icon': '🚜',
+      'color': Color(0xFF1565C0),
+      'details': 'पात्रता: महाराष्ट्रातील शेतकरी.\n'
+          'लाभ: ट्रॅक्टर, रोटाव्हेटर, थ्रेशर यावर 40-50% अनुदान.\n'
+          'अर्ज: mahadbt.maharashtra.gov.in वर ऑनलाइन.\n'
+          'कागदपत्रे: आधार, 7/12 उतारा, बँक तपशील.',
     },
     {
-      "title": "ठिबक सिंचन योजना",
-      "subtitle": "सिंचनासाठी सबसिडी",
-      "details": "ठिबक सिंचनासाठी आर्थिक मदत मिळते.",
-      "image": "assets/images/yojana3.png"
+      'title': 'ठिबक सिंचन योजना',
+      'subtitle': 'पाणी बचत व सिंचन अनुदान',
+      'icon': '💧',
+      'color': Color(0xFF00838F),
+      'details': 'पात्रता: सर्व शेतकरी.\n'
+          'लाभ: ठिबक व तुषार सिंचनावर 55-80% अनुदान.\n'
+          'अर्ज: महाडीबीटी पोर्टलवर.\n'
+          'फायदा: 40-50% पाण्याची बचत, उत्पादन वाढ.',
     },
     {
-      "title": "पीक विमा योजना",
-      "subtitle": "नुकसान भरपाई",
-      "details": "नैसर्गिक आपत्तीमुळे नुकसान भरपाई मिळते.",
-      "image": "assets/images/yojana4.png"
+      'title': 'पीक विमा योजना (PMFBY)',
+      'subtitle': 'नैसर्गिक आपत्तीत नुकसान भरपाई',
+      'icon': '🛡️',
+      'color': Color(0xFF6A1B9A),
+      'details': 'पात्रता: सर्व शेतकरी (कर्जदार व बिगर कर्जदार).\n'
+          'लाभ: दुष्काळ, पूर, गारपीट यामुळे नुकसान झाल्यास भरपाई.\n'
+          'प्रीमियम: खरीप 2%, रब्बी 1.5%.\n'
+          'अर्ज: बँक किंवा CSC केंद्रावर.',
+    },
+    {
+      'title': 'किसान क्रेडिट कार्ड',
+      'subtitle': 'कमी व्याजदरात शेती कर्ज',
+      'icon': '💳',
+      'color': Color(0xFFE65100),
+      'details': 'पात्रता: सर्व शेतकरी.\n'
+          'लाभ: 4% व्याजदरात ₹3 लाखांपर्यंत कर्ज.\n'
+          'वापर: बियाणे, खत, कीडनाशक खरेदी.\n'
+          'अर्ज: जवळच्या बँकेत किंवा ऑनलाइन.',
+    },
+    {
+      'title': 'मागेल त्याला शेततळे',
+      'subtitle': 'पाणी साठवण अनुदान',
+      'icon': '🏞️',
+      'color': Color(0xFF558B2F),
+      'details': 'पात्रता: महाराष्ट्रातील शेतकरी.\n'
+          'लाभ: शेततळे बांधण्यासाठी 100% अनुदान.\n'
+          'आकार: 15×15×3 मीटर मानक आकार.\n'
+          'अर्ज: ग्रामपंचायत किंवा कृषी विभागात.',
     },
   ];
 
-  List<bool> expanded = [];
-
   @override
-  void initState() {
-    super.initState();
-    expanded = List.generate(yojanaList.length, (_) => false);
+  void dispose() {
+    _search.dispose();
+    _tts.stop();
+    super.dispose();
+  }
+
+  List<Map<String, dynamic>> get _filtered {
+    final q = _search.text.trim().toLowerCase();
+    if (q.isEmpty) return List<Map<String, dynamic>>.from(_yojanas);
+    return _yojanas.where((y) =>
+        y['title'].toString().toLowerCase().contains(q) ||
+        y['subtitle'].toString().toLowerCase().contains(q) ||
+        y['details'].toString().toLowerCase().contains(q)).toList().cast();
+  }
+
+  void _handleVoice(String spoken) {
+    _search.text = spoken;
+    setState(() {});
+  }
+
+  Future<void> _speak(Map<String, dynamic> y) async {
+    await _tts.speak('${y['title']}. ${y['subtitle']}. ${y['details']}');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: creamColor, // ✅ UPDATED
-
-      appBar: AppBar(
-        backgroundColor: darkGreen,
-        elevation: 0,
-        title: const Text("शासकीय योजना"),
-        centerTitle: true,
-      ),
-
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-
-            /// SEARCH BAR
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: "योजना शोधा...",
-                  prefixIcon: Icon(Icons.search, color: darkGreen),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                  border: OutlineInputBorder(
+      backgroundColor: _cream,
+      body: SafeArea(
+        child: Column(children: [
+          _buildHeader(),
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
+            child: TextField(
+              controller: _search,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                hintText: 'योजना शोधा...',
+                prefixIcon: const Icon(Icons.search, color: _green),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+                    borderSide: BorderSide.none),
               ),
             ),
-
-            /// VOICE BUTTON
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: darkGreen,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.mic, color: Colors.white, size: 24),
-                  SizedBox(width: 8),
-                  Text(
-                    "योजना विचारण्यासाठी बोला",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ],
-              ),
+          ),
+          // Voice bar
+          VoiceMicBar(
+            tts: _tts,
+            hintText: 'बोला: "पीक विमा" किंवा "किसान कार्ड"',
+            onResult: _handleVoice,
+          ),
+          // List
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(14, 4, 14, 20),
+              itemCount: _filtered.length,
+              itemBuilder: (_, i) => _buildCard(_filtered[i]),
             ),
-
-            const SizedBox(height: 10),
-
-            /// YOJANA LIST
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: yojanaList.length,
-              itemBuilder: (context, index) {
-                return buildCard(index);
-              },
-            ),
-
-            const SizedBox(height: 15),
-          ],
-        ),
+          ),
+        ]),
       ),
     );
   }
 
-  /// 📦 COMPACT CARD
-  Widget buildCard(int index) {
-    final item = yojanaList[index];
+  Widget _buildCard(Map<String, dynamic> y) {
+    final title = y['title'] as String;
+    final color = y['color'] as Color;
+    final expanded = _expanded.contains(title);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          )
-        ],
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [BoxShadow(color: color.withValues(alpha: 0.15), blurRadius: 10, offset: const Offset(0, 4))],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          /// 🔽 SMALL IMAGE
-          ClipRRect(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Colored top banner
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: color,
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(14),
-              topRight: Radius.circular(14),
+              topLeft: Radius.circular(18),
+              topRight: Radius.circular(18),
             ),
-            child: SizedBox(
-              height: 110, // ✅ REDUCED HEIGHT
-              width: double.infinity,
-              child: Image.asset(
-                item["image"]!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Image.asset(
-                  "assets/images/placeholder.png",
-                  fit: BoxFit.cover,
+          ),
+          child: Row(children: [
+            Text(y['icon'] as String, style: const TextStyle(fontSize: 28)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                const SizedBox(height: 2),
+                Text(y['subtitle'] as String,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              ]),
+            ),
+          ]),
+        ),
+        // Actions + expandable details
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              _actionBtn('वाचा', Icons.article_rounded, color, () {
+                setState(() {
+                  if (expanded) _expanded.remove(title);
+                  else _expanded.add(title);
+                });
+              }),
+              const SizedBox(width: 8),
+              _actionBtn('ऐका', Icons.volume_up_rounded, color, () => _speak(y)),
+            ]),
+            if (expanded) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: color.withValues(alpha: 0.2)),
                 ),
+                child: Text(y['details'] as String,
+                    style: const TextStyle(fontSize: 13.5, height: 1.7)),
               ),
-            ),
-          ),
+            ],
+          ]),
+        ),
+      ]),
+    );
+  }
 
-          /// TEXT
-          Padding(
-            padding: const EdgeInsets.all(10), // ✅ REDUCED
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item["title"]!,
-                  style: TextStyle(
-                    fontSize: 15, // ✅ SMALLER
-                    fontWeight: FontWeight.bold,
-                    color: darkGreen,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  item["subtitle"]!,
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
-                ),
-
-                const SizedBox(height: 8),
-
-                /// BUTTONS
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          expanded[index] = !expanded[index];
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: darkGreen,
-                        minimumSize: const Size(80, 32), // ✅ SMALL BUTTON
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                      ),
-                      child: const Text("वाचा", style: TextStyle(fontSize: 12)),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(80, 32),
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        side: BorderSide(color: darkGreen),
-                      ),
-                      child: Text("अर्ज", style: TextStyle(fontSize: 12, color: darkGreen)),
-                    ),
-                  ],
-                ),
-
-                if (expanded[index]) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    item["details"]!,
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
+  Widget _actionBtn(String label, IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 4),
+          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 13)),
+        ]),
       ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(25),
+          bottomRight: Radius.circular(25),
+        ),
+      ),
+      child: Row(children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        const SizedBox(width: 4),
+        const Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('शासकीय योजना', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('शेतकऱ्यांसाठी सरकारी मदत', style: TextStyle(color: Colors.white70, fontSize: 12)),
+          ]),
+        ),
+        const Text('📋', style: TextStyle(fontSize: 32)),
+      ]),
     );
   }
 }

@@ -1,8 +1,19 @@
 {
     "Solapur": {
-    "Jowar": {"min": 3780, "max": 4270, "avg": 4050},
-    "Wheat": {"min": 2480, "max": 3775, "avg": 3365},
-    "Tur": {"min": 6805, "max": 6805, "avg": 6805},
-    "Onion": {"min": 500, "max": 1200, "avg": 900}
+        "Jowar": {"min": 3780, "max": 4270, "avg": 4050},
+        "Wheat": {"min": 2480, "max": 3775, "avg": 3365},
+        "Tur": {"min": 6805, "max": 7200, "avg": 6950},
+        "Onion": {"min": 500, "max": 1200, "avg": 900},
+        "Soybean": {"min": 4200, "max": 4800, "avg": 4500},
+        "Sunflower": {"min": 5200, "max": 5800, "avg": 5500},
+        "Groundnut": {"min": 5500, "max": 6200, "avg": 5850},
+        "Cotton": {"min": 6500, "max": 7500, "avg": 7000},
+        "Gram": {"min": 4800, "max": 5400, "avg": 5100},
+        "Maize": {"min": 1800, "max": 2200, "avg": 2000},
+        "Bajra": {"min": 2000, "max": 2400, "avg": 2200},
+        "Sugarcane": {"min": 3200, "max": 3600, "avg": 3400},
+        "Tomato": {"min": 800, "max": 2000, "avg": 1400},
+        "Pomegranate": {"min": 8000, "max": 12000, "avg": 10000},
+        "Grape": {"min": 4000, "max": 7000, "avg": 5500}
     }
 }
