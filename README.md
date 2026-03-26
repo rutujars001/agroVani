@@ -1,5 +1,46 @@
 # 🌾 AgroVani — Voice-First Farming Assistant
 
+## 🧭 About the Project
+
+India has over 140 million farmers, the majority of whom speak regional languages and have limited access to smartphones or the internet in a meaningful way. Farmers in Maharashtra primarily speak **Marathi** — yet most agricultural apps are built in English or Hindi, creating a massive accessibility gap.
+
+**AgroVani** bridges this gap by providing a **fully voice-driven agricultural assistant in Marathi**. A farmer doesn't need to type, read, or navigate complex menus. They simply **speak** — and the app understands, responds, and speaks back in Marathi.
+
+### 🌱 The Problem It Solves
+
+| Problem | AgroVani's Solution |
+|---|---|
+| Farmers can't read English apps | Fully Marathi UI + voice |
+| Crop disease info is hard to find | कृषी डॉक्टर — guided diagnosis flow |
+| Mandi prices require middlemen | Live Solapur mandi prices, voice-filtered |
+| Weather apps are complex | Ask naturally — "पाऊस पडेल का?" |
+| Government schemes are confusing | 6 schemes explained in simple Marathi |
+| Fertilizer calculation needs expertise | Speak crop + area → get exact quantity |
+
+### 🎯 Who Is It For?
+
+- Marathi-speaking farmers in Maharashtra, primarily Solapur district
+- Farmers with low digital literacy who prefer voice over text
+- Agricultural extension workers who assist farmers
+
+### 💡 How It Works
+
+1. Farmer opens the app and speaks a query in Marathi
+2. **Auditory confirmation** — app repeats what it heard and asks for confirmation
+3. After confirmation, the app processes the query and speaks the answer back
+4. Every response is spoken aloud using **Amazon Polly** TTS
+5. No typing required at any step
+
+### 🔬 Intelligence Without an LLM
+
+AgroVani does **not** use a large language model (LLM) or Dialogflow. Instead, it uses a custom **intent detection engine** built in Python that:
+- Scans the full spoken sentence for crop names, topics, and intent keywords
+- Understands natural Marathi sentences like "सोलापूर मध्ये आज पाऊस पडेल का?"
+- Parses Marathi number words (पाच, तीन, दहा) for the fertilizer calculator
+- Maps voice input to structured data entirely offline — no API cost per query
+
+---
+
 AgroVani is a **Marathi-language voice assistant** built for farmers. It provides crop advice, mandi prices, weather updates, government schemes, and fertilizer calculations — all through a conversational voice interface powered by **Flutter**, **Flask**, and **Amazon Polly**.
 
 ---
