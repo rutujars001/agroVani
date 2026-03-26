@@ -7,7 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 /// Drop-in TTS helper.
 /// Tries Amazon Polly (/speak) first; falls back to FlutterTts on any error.
 class PollyTts {
-  static const _speakUrl = 'http://127.0.0.1:5000/speak';
+  static const _speakUrl = 'http://10.210.216.112:5000/speak';
 
   final AudioPlayer _player   = AudioPlayer();
   final FlutterTts  _fallback = FlutterTts();

@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     try {
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/query'),
+        Uri.parse('http://10.210.216.112:5000/query'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'query': cleanQuery}),
       );

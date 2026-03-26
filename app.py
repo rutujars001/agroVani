@@ -101,17 +101,48 @@ def mandi_prices():
             "data": []
         }), 500
 
-def fetch_weather(city="Solapur"):
+def fetch_weather(city="Solapur", query_text=""):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API_KEY}&units=metric"
     try:
         response = requests.get(url).json()
-        if response.get("cod") == 200:
-            temp = response['main']['temp']
-            return f"{city} madhe aaj tapman {temp}°C aahe."
-        else:
-            return "Kshamasva, mala havamanacha andaj gheta yet nahiye."
+        if response.get("cod") != 200:
+            return "क्षमस्व, हवामान माहिती मिळाली नाही."
+
+        temp      = response['main']['temp']
+        humidity  = response['main']['humidity']
+        condition = response['weather'][0]['main'].lower()
+        desc      = response['weather'][0]['description']
+        wind      = response['wind']['speed']
+        clouds    = response['clouds']['all']
+
+        text = query_text.lower()
+
+        # Rain question
+        if any(w in text for w in ['paus', 'rain', 'varsha', 'padel', 'pavas', 'पाऊस', 'पाउस', 'वर्षा', 'पडेल']):
+            if 'rain' in condition or 'drizzle' in condition or 'thunderstorm' in condition:
+                return f"{city} मध्ये आज पाऊस पडण्याची शक्यता आहे. सध्या {desc} आहे, आर्द्रता {humidity}% आणि ढग {clouds}% आहेत."
+            elif clouds > 60 or humidity > 75:
+                return f"{city} मध्ये आज पाऊस पडण्याची थोडी शक्यता आहे. ढग {clouds}% आणि आर्द्रता {humidity}% आहे. सावध राहा."
+            else:
+                return f"{city} मध्ये आज पाऊस पडण्याची शक्यता कमी आहे. आकाश {desc} आहे, तापमान {temp}°C आहे."
+
+        # Wind question
+        if any(w in text for w in ['vara', 'wind', 'वारा', 'वादळ', 'storm']):
+            return f"{city} मध्ये वाऱ्याचा वेग {wind} मीटर प्रति सेकंद आहे. {'वादळाची शक्यता आहे, काळजी घ्या.' if wind > 10 else 'वारा सामान्य आहे.'}"
+
+        # Humidity question
+        if any(w in text for w in ['humidity', 'aardrata', 'आर्द्रता', 'दमट']):
+            return f"{city} मध्ये सध्या आर्द्रता {humidity}% आहे. {'हवा खूप दमट आहे, बुरशीजन्य रोगांसाठी फवारणी करा.' if humidity > 80 else 'आर्द्रता सामान्य आहे.'}"
+
+        # Temperature question
+        if any(w in text for w in ['tapman', 'temp', 'तापमान', 'उष्णता', 'थंडी']):
+            return f"{city} मध्ये आज तापमान {temp}°C आहे. {'खूप उष्ण आहे, पिकांना पाणी द्या.' if temp > 35 else 'थंडीचे वातावरण आहे, पिकांचे संरक्षण करा.' if temp < 15 else 'तापमान सामान्य आहे.'}"
+
+        # General weather
+        return f"{city} मध्ये आज तापमान {temp}°C, आर्द्रता {humidity}%, वाऱ्याचा वेग {wind} m/s आहे. आकाश {desc} आहे."
+
     except:
-        return "Server error. Krupaya nantar prayatna kara."
+        return "सर्व्हर एरर. कृपया नंतर प्रयत्न करा."
 
 _marathi_crop_names = {
     "Jowar": "ज्वारी", "Wheat": "गहू", "Tur": "तूर", "Onion": "कांदा",
@@ -189,82 +220,90 @@ def fetch_mandi_price(commodity="Jowar"):
         print(f"Error: {e}")
         return "माफ करा, बाजारभाव माहिती उपलब्ध नाही."
 
+# ── shared lookup tables ──────────────────────────────────────────────────────
+_CROP_MAP = {
+    "jowar": "Jowar", "jwari": "Jowar", "jwair": "Jowar", "ज्वारी": "Jowar",
+    "wheat": "Wheat", "gahu": "Wheat", "गहू": "Wheat",
+    "toor": "Tur", "तूर": "Tur",
+    "onion": "Onion", "kanda": "Onion", "कांदा": "Onion",
+    "soybean": "Soybean", "soyabean": "Soybean", "soya": "Soybean", "सोयाबीन": "Soybean",
+    "sunflower": "Sunflower", "suryafool": "Sunflower", "सूर्यफूल": "Sunflower",
+    "groundnut": "Groundnut", "shengdana": "Groundnut", "शेंगदाणा": "Groundnut",
+    "cotton": "Cotton", "kapus": "Cotton", "कापूस": "Cotton",
+    "harbhara": "Gram", "chana": "Gram", "हरभरा": "Gram",
+    "maize": "Maize", "makka": "Maize", "corn": "Maize", "मका": "Maize",
+    "bajra": "Bajra", "bajri": "Bajra", "बाजरी": "Bajra",
+    "sugarcane": "Sugarcane", "oos": "Sugarcane", "ऊस": "Sugarcane",
+    "tomato": "Tomato", "tamatar": "Tomato", "tometo": "Tomato", "टोमॅटो": "Tomato",
+    "pomegranate": "Pomegranate", "dalimb": "Pomegranate", "डाळिंब": "Pomegranate",
+    "grape": "Grape", "draksha": "Grape", "द्राक्षे": "Grape",
+    # short keys last to avoid false matches
+    "jowar": "Jowar", "tur": "Tur", "gram": "Gram",
+}
+
+_TOPIC_KEYWORDS = [
+    "rog", "kida", "kidi", "disease", "pest", "रोग", "किडी",
+    "khat", "khad", "fertilizer", "खत",
+    "pani", "sinchan", "water", "पाणी", "सिंचन",
+]
+
+_WEATHER_KEYWORDS = [
+    "havaman", "weather", "tapman", "hava", "paus", "varsha",
+    "हवामान", "तापमान", "पाऊस", "वर्षा", "ऊन", "थंडी",
+]
+
+_MANDI_KEYWORDS = [
+    "bhav", "mandi", "bajar", "rate", "kimat", "mol",
+    "भाव", "बाजार", "मंडई", "किंमत", "दर",
+]
+
+def _contains(text, keywords):
+    """Return True if any keyword appears as a substring in text."""
+    return any(kw in text for kw in keywords)
+
+def _extract_crop(text):
+    """Return the first matching crop key found anywhere in the sentence."""
+    for key, val in _CROP_MAP.items():
+        if key in text:
+            return val
+    return None
+
+def _extract_topic(text):
+    return next((kw for kw in _TOPIC_KEYWORDS if kw in text), "")
+
 def _detect_intent_from_text(query_text):
+    import re
     text = (query_text or "").strip().lower()
     if not text:
         return "fallback", None
 
-    if any(word in text for word in ["namaskar", "hello", "hi", "नमस्कार"]):
+    if _contains(text, ["namaskar", "hello", "hi ", "नमस्कार"]):
         return "Default Welcome Intent", None
 
-    if any(word in text for word in ["havaman", "weather", "tapman", "हवामान", "तापमान"]):
+    if _contains(text, _WEATHER_KEYWORDS):
         return "get_weather", None
 
-    # Farm doctor keywords — check before mandi price
-    farm_doctor_topics = [
-        "rog", "kida", "kidi", "disease", "pest",
-        "khat", "khad", "fertilizer",
-        "pani", "sinchan", "water",
-        "रोग", "किडी", "खत", "पाणी", "सिंचन",
-    ]
-    if any(word in text for word in farm_doctor_topics):
-        # Try to detect crop from same text
-        detected_crop = None
-        farm_crop_map = {
-            "jowar": "Jowar", "jwari": "Jowar", "ज्वारी": "Jowar",
-            "wheat": "Wheat", "gahu": "Wheat", "गहू": "Wheat",
-            "tur": "Tur", "toor": "Tur", "तूर": "Tur",
-            "onion": "Onion", "kanda": "Onion", "कांदा": "Onion",
-            "soybean": "Soybean", "soya": "Soybean", "सोयाबीन": "Soybean",
-            "sunflower": "Sunflower", "suryafool": "Sunflower", "सूर्यफूल": "Sunflower",
-            "groundnut": "Groundnut", "shengdana": "Groundnut", "शेंगदाणा": "Groundnut",
-            "cotton": "Cotton", "kapus": "Cotton", "कापूस": "Cotton",
-            "gram": "Gram", "harbhara": "Gram", "हरभरा": "Gram",
-            "maize": "Maize", "makka": "Maize", "मका": "Maize",
-            "bajra": "Bajra", "bajri": "Bajra", "बाजरी": "Bajra",
-            "sugarcane": "Sugarcane", "oos": "Sugarcane", "ऊस": "Sugarcane",
-            "tomato": "Tomato", "tamatar": "Tomato", "टोमॅटो": "Tomato",
-            "pomegranate": "Pomegranate", "dalimb": "Pomegranate", "डाळिंब": "Pomegranate",
-            "grape": "Grape", "draksha": "Grape", "द्राक्षे": "Grape",
-        }
-        for key, val in farm_crop_map.items():
-            if key in text:
-                detected_crop = val
-                break
-        detected_topic = next((w for w in farm_doctor_topics if w in text), "")
-        return "get_farm_doctor", (detected_crop, detected_topic)
+    # Farm doctor — topic keyword anywhere in sentence
+    if _contains(text, _TOPIC_KEYWORDS):
+        crop  = _extract_crop(text)
+        topic = _extract_topic(text)
+        return "get_farm_doctor", (crop, topic)
 
-    crop_map = {
-        "jowar": "Jowar", "jwari": "Jowar", "jwair": "Jowar", "ज्वारी": "Jowar",
-        "wheat": "Wheat", "gahu": "Wheat", "गहू": "Wheat",
-        "tur": "Tur", "toor": "Tur", "तूर": "Tur",
-        "onion": "Onion", "kanda": "Onion", "कांदा": "Onion",
-        "soybean": "Soybean", "soya": "Soybean", "soyabean": "Soybean", "सोयाबीन": "Soybean",
-        "sunflower": "Sunflower", "suryafool": "Sunflower", "सूर्यफूल": "Sunflower",
-        "groundnut": "Groundnut", "shengdana": "Groundnut", "शेंगदाणा": "Groundnut",
-        "cotton": "Cotton", "kapus": "Cotton", "कापूस": "Cotton",
-        "gram": "Gram", "chana": "Gram", "harbhara": "Gram", "हरभरा": "Gram",
-        "maize": "Maize", "makka": "Maize", "corn": "Maize", "मका": "Maize",
-        "bajra": "Bajra", "bajri": "Bajra", "बाजरी": "Bajra",
-        "sugarcane": "Sugarcane", "oos": "Sugarcane", "ऊस": "Sugarcane",
-        "tomato": "Tomato", "tamatar": "Tomato", "tometo": "Tomato", "टोमॅटो": "Tomato",
-        "pomegranate": "Pomegranate", "dalimb": "Pomegranate", "डाळिंब": "Pomegranate",
-        "grape": "Grape", "draksha": "Grape", "द्राक्षे": "Grape",
-    }
-    for key, value in crop_map.items():
-        if key in text:
-            return "get_mandi_price", value
+    # Mandi price — crop name OR price keyword anywhere in sentence
+    crop = _extract_crop(text)
+    if crop:
+        return "get_mandi_price", crop
 
-    if any(word in text for word in ["bhav", "mandi", "bajar", "भाव", "बाजार"]):
+    if _contains(text, _MANDI_KEYWORDS):
         return "get_mandi_price", None
 
     return "fallback", None
 
-def _build_reply(intent, param):
+def _build_reply(intent, param, query_text=""):
     if intent == "Default Welcome Intent":
         return "नमस्कार! AgroVani मध्ये आपले स्वागत आहे."
     if intent == "get_weather":
-        return fetch_weather("Solapur")
+        return fetch_weather("Solapur", query_text)
     if intent == "get_mandi_price":
         if param:
             return fetch_mandi_price(param)
@@ -281,7 +320,7 @@ def query():
     data = request.get_json(silent=True, force=True) or {}
     query_text = data.get('query', '')
     intent, param = _detect_intent_from_text(query_text)
-    reply = _build_reply(intent, param)
+    reply = _build_reply(intent, param, query_text)
     return jsonify({
         "success": True,
         "intent": intent,

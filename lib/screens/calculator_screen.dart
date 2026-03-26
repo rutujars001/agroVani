@@ -94,19 +94,37 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     await _tts.speak(text);
   }
 
+  // Marathi word → number
+  static const _marathiNumbers = <String, String>{
+    'एक': '1', 'दोन': '2', 'तीन': '3', 'चार': '4', 'पाच': '5',
+    'सहा': '6', 'सात': '7', 'आठ': '8', 'नऊ': '9', 'दहा': '10',
+    'अकरा': '11', 'बारा': '12', 'तेरा': '13', 'चौदा': '14', 'पंधरा': '15',
+    'वीस': '20', 'पंचवीस': '25', 'तीस': '30', 'पन्नास': '50',
+  };
+
   void _handleVoice(String spoken) {
-    final lower = spoken.toLowerCase();
-    // Extract crop
+    String lower = spoken.toLowerCase();
+
+    // Replace Marathi number words with digits
+    _marathiNumbers.forEach((word, digit) {
+      lower = lower.replaceAll(word, digit);
+    });
+
+    // Extract crop anywhere in sentence
     _voiceCropMap.forEach((k, v) { if (lower.contains(k)) _crop = v; });
-    // Extract fertilizer
+
+    // Extract fertilizer anywhere in sentence
     _voiceFertMap.forEach((k, v) { if (lower.contains(k)) _fertilizer = v; });
-    // Extract area — look for digits
+
+    // Extract area — digits (including decimals)
     final numMatch = RegExp(r'(\d+\.?\d*)').firstMatch(lower);
     if (numMatch != null) _areaCtrl.text = numMatch.group(1)!;
-    // Extract unit
+
+    // Extract unit anywhere in sentence
     if (lower.contains('हेक्टर') || lower.contains('hectare')) _unit = 'हेक्टर';
     if (lower.contains('एकर') || lower.contains('acre')) _unit = 'एकर';
-    // Ensure fertilizer is valid for selected crop
+
+    // Fallback fertilizer if not valid for crop
     if (!(_doses[_crop]?.containsKey(_fertilizer) ?? false)) {
       _fertilizer = _doses[_crop]?.keys.first ?? 'युरिया';
     }

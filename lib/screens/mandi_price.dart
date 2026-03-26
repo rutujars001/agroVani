@@ -67,7 +67,7 @@ class _BazaarScreenState extends State<BazaarScreen> {
   Future<void> _fetch() async {
     setState(() { _loading = true; _error = null; });
     try {
-      final res = await http.get(Uri.parse('http://127.0.0.1:5000/mandi-prices?market=Solapur'));
+      final res = await http.get(Uri.parse('http://10.210.216.112:5000/mandi-prices?market=Solapur'));
       if (res.statusCode != 200) throw Exception('HTTP ${res.statusCode}');
       final payload = json.decode(res.body) as Map<String, dynamic>;
       final data = payload['data'] as List<dynamic>? ?? [];
@@ -90,7 +90,9 @@ class _BazaarScreenState extends State<BazaarScreen> {
   void _handleVoice(String spoken) {
     final lower = spoken.toLowerCase();
     String? found;
-    _voiceCropMap.forEach((k, v) { if (lower.contains(k)) found = v; });
+    for (final e in _voiceCropMap.entries) {
+      if (lower.contains(e.key)) { found = e.value; break; }
+    }
     if (found != null) {
       setState(() => _pinnedCrop = found);
       _speakCropPrice(found!);

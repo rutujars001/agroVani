@@ -75,7 +75,7 @@ class _CropsScreenState extends State<CropsScreen> {
     setState(() => _loading = true);
     try {
       final res = await http.post(
-        Uri.parse('http://127.0.0.1:5000/query'),
+        Uri.parse('http://10.210.216.112:5000/query'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'query': '$cropKey $topic'}),
       );
@@ -97,8 +97,13 @@ class _CropsScreenState extends State<CropsScreen> {
   void _handleVoice(String spoken) {
     final lower = spoken.toLowerCase();
     String? crop;
-    _voiceCropMap.forEach((k, v) { if (lower.contains(k)) crop = v; });
-    if (crop != null) _selectCrop(crop!);
+    for (final e in _voiceCropMap.entries) {
+      if (lower.contains(e.key)) { crop = e.value; break; }
+    }
+    if (crop != null) {
+      _selectCrop(crop!);
+      _speakCropSummary(crop!);
+    }
   }
 
   Future<void> _speak(String text) async {

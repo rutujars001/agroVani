@@ -1,3 +1,44 @@
+# Python
 .env
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.egg-info/
+venv/
+env/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+
+# Android
+android/.gradle/
+android/local.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/.kotlin/
+
+# iOS / macOS
+ios/Pods/
+ios/.symlinks/
+macos/Pods/
+*.xcworkspace/xcuserdata/
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.user
+
+# Misc
+ngrok.exe
+ngrok_recovery_codes.txt
+*.log

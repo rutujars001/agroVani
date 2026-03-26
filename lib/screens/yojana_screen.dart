@@ -95,7 +95,59 @@ class _YojanaScreenState extends State<YojanaScreen> {
         y['details'].toString().toLowerCase().contains(q)).toList().cast();
   }
 
+  // keyword → yojana title mapping
+  static const _voiceYojanaMap = <String, String>{
+    'किसान': 'प्रधानमंत्री किसान योजना',
+    'pmkisan': 'प्रधानमंत्री किसान योजना',
+    'pm kisan': 'प्रधानमंत्री किसान योजना',
+    'महाडीबीटी': 'महाडीबीटी यांत्रिकीकरण',
+    'mahadbt': 'महाडीबीटी यांत्रिकीकरण',
+    'यांत्रिकीकरण': 'महाडीबीटी यांत्रिकीकरण',
+    'yantrikaran': 'महाडीबीटी यांत्रिकीकरण',
+    'ट्रॅक्टर': 'महाडीबीटी यांत्रिकीकरण',
+    'tractor': 'महाडीबीटी यांत्रिकीकरण',
+    'ठिबक': 'ठिबक सिंचन योजना',
+    'thibak': 'ठिबक सिंचन योजना',
+    'सिंचन': 'ठिबक सिंचन योजना',
+    'sinchan': 'ठिबक सिंचन योजना',
+    'drip': 'ठिबक सिंचन योजना',
+    'विमा': 'पीक विमा योजना (PMFBY)',
+    'vima': 'पीक विमा योजना (PMFBY)',
+    'pmfby': 'पीक विमा योजना (PMFBY)',
+    'insurance': 'पीक विमा योजना (PMFBY)',
+    'क्रेडिट': 'किसान क्रेडिट कार्ड',
+    'credit': 'किसान क्रेडिट कार्ड',
+    'kcc': 'किसान क्रेडिट कार्ड',
+    'कर्ज': 'किसान क्रेडिट कार्ड',
+    'karj': 'किसान क्रेडिट कार्ड',
+    'शेततळे': 'मागेल त्याला शेततळे',
+    'shetale': 'मागेल त्याला शेततळे',
+    'तळे': 'मागेल त्याला शेततळे',
+    'magel': 'मागेल त्याला शेततळे',
+  };
+
   void _handleVoice(String spoken) {
+    final lower = spoken.toLowerCase();
+    String? matchedTitle;
+    for (final e in _voiceYojanaMap.entries) {
+      if (lower.contains(e.key)) { matchedTitle = e.value; break; }
+    }
+    if (matchedTitle != null) {
+      // Find the yojana and speak it directly
+      final yojana = _yojanas.firstWhere(
+        (y) => y['title'] == matchedTitle,
+        orElse: () => {},
+      );
+      if (yojana.isNotEmpty) {
+        setState(() {
+          _expanded.add(matchedTitle!);
+          _search.text = '';
+        });
+        _speak(yojana);
+        return;
+      }
+    }
+    // Fallback — use spoken text as search filter
     _search.text = spoken;
     setState(() {});
   }
