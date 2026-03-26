@@ -3,7 +3,7 @@
   "packages": [
     {
       "name": "async",
-      "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.13.0",
+      "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.13.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -158,12 +158,6 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "js",
-      "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/js-0.7.2",
-      "packageUri": "lib/",
-      "languageVersion": "3.7"
-    },
-    {
       "name": "json_annotation",
       "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/json_annotation-4.11.0",
       "packageUri": "lib/",
@@ -237,7 +231,7 @@
     },
     {
       "name": "path_provider_android",
-      "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.22",
+      "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.23",
       "packageUri": "lib/",
       "languageVersion": "3.9"
     },
@@ -303,19 +297,19 @@
     },
     {
       "name": "speech_to_text",
-      "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/speech_to_text-6.6.2",
+      "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/speech_to_text-7.3.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
-      "name": "speech_to_text_macos",
-      "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/speech_to_text_macos-1.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.3"
     },
     {
       "name": "speech_to_text_platform_interface",
       "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/speech_to_text_platform_interface-2.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "speech_to_text_windows",
+      "rootUri": "file:///C:/Users/rutuj/AppData/Local/Pub/Cache/hosted/pub.dev/speech_to_text_windows-1.0.0+beta.8",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
