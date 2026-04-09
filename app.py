@@ -7,7 +7,7 @@ import base64
 from datetime import date
 from flask import Flask, request, jsonify
 import boto3
-from botocore.exceptions import BotoCoreError, ClientError
+import xml.etree.ElementTree as ET
 
 app = Flask(__name__)
 WEATHER_API_KEY = '482a3a616b59b6ad77409e8aed90da11'
@@ -21,8 +21,8 @@ _polly = boto3.client(
     aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
     aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
 )
-_POLLY_VOICE  = 'Aditi'    # swap to 'Kajal' for Neural
-_POLLY_ENGINE = 'standard' # swap to 'neural' when using Kajal
+_POLLY_VOICE  = 'Kajal'   # Neural Hindi voice — reads Marathi Devanagari naturally
+_POLLY_ENGINE = 'neural'  # Kajal requires neural engine
 _POLLY_LANG   = 'hi-IN'
 
 @app.after_request
@@ -70,36 +70,84 @@ def speak():
 
 @app.route('/mandi-prices', methods=['GET'])
 def mandi_prices():
-    market_name = request.args.get('market', 'Solapur')
+    state = request.args.get('state', 'Maharashtra')
     try:
+        url = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070'
+        params = {
+            'api-key': '579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b',
+            'format':  'json',
+            'limit':   100,
+            'filters[state]': state,
+        }
+        res     = requests.get(url, params=params, timeout=8).json()
+        records = res.get('records', [])
+
+        if not records:
+            raise ValueError('No records')
+
+        today = date.today().strftime("%d-%m-%Y")
+        rows  = []
+        seen  = set()
+        # Normalize commodity names to match Flutter crop keys
+        _commodity_normalize = {
+            'jowar': 'Jowar', 'sorghum': 'Jowar',
+            'wheat': 'Wheat',
+            'tur': 'Tur', 'arhar': 'Tur', 'pigeonpea': 'Tur',
+            'onion': 'Onion',
+            'soybean': 'Soybean', 'soya': 'Soybean',
+            'sunflower': 'Sunflower',
+            'groundnut': 'Groundnut',
+            'cotton': 'Cotton',
+            'gram': 'Gram', 'chickpea': 'Gram', 'harbhara': 'Gram',
+            'maize': 'Maize', 'corn': 'Maize',
+            'bajra': 'Bajra', 'pearlmillet': 'Bajra',
+            'sugarcane': 'Sugarcane',
+            'tomato': 'Tomato',
+            'pomegranate': 'Pomegranate',
+            'grape': 'Grape',
+        }
+        for r in records:
+            raw = r.get('commodity', '').strip().lower()
+            # Match against normalize map using substring
+            normalized = None
+            for key, val in _commodity_normalize.items():
+                if key in raw:
+                    normalized = val
+                    break
+            if not normalized:
+                normalized = r.get('commodity', '').strip().title()
+            if normalized in seen:
+                continue
+            seen.add(normalized)
+            rows.append({
+                'market_name':       r.get('market', state),
+                'variety':           normalized,
+                'price_per_quintal': r.get('modal_price', 0),
+                'min':               r.get('min_price',   0),
+                'max':               r.get('max_price',   0),
+                'date':              r.get('arrival_date', today),
+            })
+
+        return jsonify({'success': True, 'count': len(rows), 'data': rows})
+
+    except Exception as e:
+        print(f"data.gov.in mandi-prices failed: {e} — falling back to local")
+        # Fallback to local JSON
         with open('mandi_data.json', 'r') as f:
             data = json.load(f)
-
-        market_data = data.get(market_name, {})
+        market_data = data.get('Solapur', {})
         today = date.today().strftime("%d-%m-%Y")
         rows = []
         for variety, price_obj in market_data.items():
             rows.append({
-                "market_name": market_name,
-                "variety": variety,
-                "price_per_quintal": price_obj.get("avg", 0),
-                "min": price_obj.get("min", 0),
-                "max": price_obj.get("max", 0),
-                "date": today
+                'market_name':       'Solapur',
+                'variety':           variety,
+                'price_per_quintal': price_obj.get('avg', 0),
+                'min':               price_obj.get('min', 0),
+                'max':               price_obj.get('max', 0),
+                'date':              today,
             })
-
-        return jsonify({
-            "success": True,
-            "count": len(rows),
-            "data": rows
-        })
-    except Exception as e:
-        print(f"Error loading mandi prices: {e}")
-        return jsonify({
-            "success": False,
-            "message": "Unable to load mandi prices",
-            "data": []
-        }), 500
+        return jsonify({'success': True, 'count': len(rows), 'data': rows})
 
 def fetch_weather(city="Solapur", query_text=""):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API_KEY}&units=metric"
@@ -201,7 +249,45 @@ def get_crop_advice(crop: str, topic: str) -> str:
         print(f"crop_info error: {e}")
         return 'क्षमस्व, मला या पिकाची माहिती मिळाली नाही. मी लवकरच अपडेट करेन.'
 
-def fetch_mandi_price(commodity="Jowar"):
+def fetch_live_mandi(commodity="Jowar", state="Maharashtra"):
+    """
+    Fetch live mandi prices from data.gov.in official API.
+    Falls back to mandi_data.json on failure.
+    """
+    try:
+        url = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070'
+        params = {
+            'api-key': '579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b',
+            'format':  'json',
+            'limit':   5,
+            'filters[state]':     state,
+            'filters[commodity]': commodity,
+        }
+        res  = requests.get(url, params=params, timeout=8).json()
+        records = res.get('records', [])
+
+        if not records:
+            raise ValueError('No records found')
+
+        r           = records[0]
+        market      = r.get('market',   'सोलापूर')
+        min_price   = r.get('min_price', '-')
+        max_price   = r.get('max_price', '-')
+        modal_price = r.get('modal_price', '-')
+        arrival_date= r.get('arrival_date', '')
+        marathi_name = _marathi_crop_names.get(commodity, commodity)
+
+        return (
+            f"Agmarknet अधिकृत भाव ({arrival_date}): "
+            f"{marathi_name} — {market} मंडईत सरासरी ₹{modal_price}, "
+            f"किमान ₹{min_price}, कमाल ₹{max_price} प्रति क्विंटल."
+        )
+
+    except Exception as e:
+        print(f"data.gov.in API failed: {e} — falling back to local data")
+        return fetch_mandi_price(commodity)
+
+
     try:
         if isinstance(commodity, list):
             commodity = commodity[0]
@@ -306,7 +392,7 @@ def _build_reply(intent, param, query_text=""):
         return fetch_weather("Solapur", query_text)
     if intent == "get_mandi_price":
         if param:
-            return fetch_mandi_price(param)
+            return fetch_live_mandi(param, "Maharashtra")
         return "कोणत्या पिकाचा बाजारभाव हवा आहे? (ज्वारी, गहू, कांदा, तूर...)"
     if intent == "get_farm_doctor":
         crop, topic = param if isinstance(param, tuple) else (param, "")
@@ -315,7 +401,106 @@ def _build_reply(intent, param, query_text=""):
         return get_crop_advice(crop, topic or "")
     return "क्षमस्व, मला समजले नाही. कृपया पुन्हा सांगा."
 
-@app.route('/query', methods=['POST'])
+# ── Crop recommendation logic ─────────────────────────────────────────────────
+_SOIL_CROP_MAP = {
+    'black':  {'high_humidity': 'कापूस', 'low_humidity': 'ज्वारी', 'rainy': 'सोयाबीन'},
+    'red':    {'high_humidity': 'भुईमूग', 'low_humidity': 'बाजरी', 'rainy': 'तूर'},
+    'alluvial':{'high_humidity': 'गहू',  'low_humidity': 'मका',   'rainy': 'ऊस'},
+    'sandy':  {'high_humidity': 'शेंगदाणा','low_humidity': 'बाजरी','rainy': 'मका'},
+    'loamy':  {'high_humidity': 'गहू',   'low_humidity': 'हरभरा', 'rainy': 'सोयाबीन'},
+}
+
+_SOIL_MARATHI = {
+    'black': 'काळी माती', 'red': 'लाल माती',
+    'alluvial': 'गाळाची माती', 'sandy': 'वालुकामय माती', 'loamy': 'चिकणमाती',
+}
+
+@app.route('/agri-news', methods=['GET'])
+def agri_news():
+    try:
+        url = 'https://newsapi.org/v2/everything'
+        params = {
+            'q': 'agriculture India farming crops mandi',
+            'language': 'en',
+            'sortBy': 'publishedAt',
+            'pageSize': 3,
+            'apiKey': '0fabec243c9e4edebe93e06efef0005d',
+        }
+        res  = requests.get(url, params=params, timeout=6).json()
+        articles = res.get('articles', [])
+        news = []
+        for a in articles[:3]:
+            news.append({
+                'title':  a.get('title', '').split(' - ')[0].strip(),
+                'source': a.get('source', {}).get('name', 'Trusted News'),
+                'link':   a.get('url', ''),
+                'date':   (a.get('publishedAt') or '')[:10],
+            })
+        if news:
+            return jsonify({'success': True, 'news': news})
+        raise ValueError('No articles')
+    except Exception as e:
+        print(f'NewsAPI error: {e}')
+        # Fallback static headlines
+        return jsonify({'success': True, 'news': [
+            {'title': 'खरीप हंगामात सोयाबीन लागवडीसाठी शेतकर्यांनी तयारी करावी', 'source': 'Krishi Jagran', 'link': '', 'date': ''},
+            {'title': 'पीक विमा योजनेत नोंदणीसाठी अंतिम तारीख जवळ येत आहे', 'source': 'ET Agriculture', 'link': '', 'date': ''},
+            {'title': 'सोलापूर जिल्ह्यात कांदा उत्पादनात वाढ, भाव स्थिर', 'source': 'Krishi Jagran', 'link': '', 'date': ''},
+        ]})
+
+
+def recommend_crop():
+    data      = request.get_json(silent=True, force=True) or {}
+    soil_type = (data.get('soil_type') or 'black').lower().strip()
+    city      = data.get('city', 'Solapur')
+
+    # Get live weather
+    try:
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API_KEY}&units=metric"
+        w         = requests.get(url, timeout=5).json()
+        humidity  = w['main']['humidity']
+        condition = w['weather'][0]['main'].lower()
+        temp      = w['main']['temp']
+    except:
+        humidity, condition, temp = 60, 'clear', 28
+
+    # Determine weather condition bucket
+    if 'rain' in condition or 'thunder' in condition or 'drizzle' in condition:
+        bucket = 'rainy'
+    elif humidity > 70:
+        bucket = 'high_humidity'
+    else:
+        bucket = 'low_humidity'
+
+    soil_key  = soil_type if soil_type in _SOIL_CROP_MAP else 'black'
+    crop      = _SOIL_CROP_MAP[soil_key][bucket]
+    soil_mr   = _SOIL_MARATHI.get(soil_key, soil_key)
+
+    # Build contextual reason
+    if bucket == 'rainy':
+        reason = f"सध्या पाऊस आहे आणि {soil_mr} आहे"
+    elif bucket == 'high_humidity':
+        reason = f"आर्द्रता {humidity}% जास्त आहे आणि {soil_mr} आहे"
+    else:
+        reason = f"तापमान {temp}°C आहे आणि {soil_mr} आहे"
+
+    message = (
+        f"🌱 स्मार्ट सूचना: {reason}, त्यामुळे "
+        f"**{crop}** लागवड केल्यास जास्त उत्पादन मिळेल. "
+        f"सध्याचे हवामान या पिकासाठी अनुकूल आहे."
+    )
+
+    return jsonify({
+        'success':    True,
+        'crop':       crop,
+        'soil':       soil_mr,
+        'humidity':   humidity,
+        'condition':  condition,
+        'temp':       temp,
+        'message':    message,
+    })
+
+
 def query():
     data = request.get_json(silent=True, force=True) or {}
     query_text = data.get('query', '')
@@ -328,7 +513,51 @@ def query():
         "fulfillmentText": reply
     })
 
-@app.route('/webhook', methods=['POST'])
+@app.route('/query', methods=['POST'])
+def query():
+    data = request.get_json(silent=True, force=True) or {}
+    query_text = data.get('query', '')
+    intent, param = _detect_intent_from_text(query_text)
+    reply = _build_reply(intent, param, query_text)
+    return jsonify({
+        'success': True,
+        'intent': intent,
+        'query': query_text,
+        'fulfillmentText': reply
+    })
+
+@app.route('/recommend', methods=['POST'])
+def recommend_crop():
+    data      = request.get_json(silent=True, force=True) or {}
+    soil_type = (data.get('soil_type') or 'black').lower().strip()
+    city      = data.get('city', 'Solapur')
+    try:
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API_KEY}&units=metric"
+        w         = requests.get(url, timeout=5).json()
+        humidity  = w['main']['humidity']
+        condition = w['weather'][0]['main'].lower()
+        temp      = w['main']['temp']
+    except:
+        humidity, condition, temp = 60, 'clear', 28
+    if 'rain' in condition or 'thunder' in condition or 'drizzle' in condition:
+        bucket = 'rainy'
+    elif humidity > 70:
+        bucket = 'high_humidity'
+    else:
+        bucket = 'low_humidity'
+    soil_key  = soil_type if soil_type in _SOIL_CROP_MAP else 'black'
+    crop      = _SOIL_CROP_MAP[soil_key][bucket]
+    soil_mr   = _SOIL_MARATHI.get(soil_key, soil_key)
+    if bucket == 'rainy':
+        reason = f"सध्या पाऊस आहे आणि {soil_mr} आहे"
+    elif bucket == 'high_humidity':
+        reason = f"आर्द्रता {humidity}% जास्त आहे आणि {soil_mr} आहे"
+    else:
+        reason = f"तापमान {temp}°C आहे आणि {soil_mr} आहे"
+    message = f"🌱 स्मार्ट सूचना: {reason}, त्यामुळे {crop} लागवड केल्यास जास्त उत्पादन मिळेल. सध्याचे हवामान या पिकासाठी अनुकूल आहे."
+    return jsonify({'success': True, 'crop': crop, 'soil': soil_mr, 'humidity': humidity, 'condition': condition, 'temp': temp, 'message': message})
+
+
 def webhook():
     data = request.get_json(silent=True, force=True)
     query_result = data.get('queryResult', {})
@@ -355,4 +584,4 @@ def webhook():
     return jsonify({"fulfillmentText": reply})
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

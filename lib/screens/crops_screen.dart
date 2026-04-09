@@ -75,7 +75,7 @@ class _CropsScreenState extends State<CropsScreen> {
     setState(() => _loading = true);
     try {
       final res = await http.post(
-        Uri.parse('http://10.210.216.112:5000/query'),
+        Uri.parse('http://127.0.0.1:5000/query'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'query': '$cropKey $topic'}),
       );
@@ -101,8 +101,8 @@ class _CropsScreenState extends State<CropsScreen> {
       if (lower.contains(e.key)) { crop = e.value; break; }
     }
     if (crop != null) {
-      _selectCrop(crop!);
-      _speakCropSummary(crop!);
+      _selectCrop(crop);
+      _speakCropSummary(crop);
     }
   }
 
