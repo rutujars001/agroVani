@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart';
+import 'screens/welcome_screen.dart';
+import 'screens/main_navigation.dart';
 import 'screens/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -10,9 +17,43 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      title: 'AgroVani',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00897B),
+          primary: const Color(0xFF00897B),
+        ),
+        scaffoldBackgroundColor: Colors.white,
+        useMaterial3: true,
+      ),
+      home: const SplashRouter(),
     );
   }
+}
+
+class SplashRouter extends StatefulWidget {
+  const SplashRouter({super.key});
+  @override
+  State<SplashRouter> createState() => _SplashRouterState();
+}
+
+class _SplashRouterState extends State<SplashRouter> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 2), _navigate);
+  }
+
+  void _navigate() {
+    if (!mounted) return;
+    final user = FirebaseAuth.instance.currentUser;
+    Navigator.pushReplacement(context, MaterialPageRoute(
+      builder: (_) => user != null ? const MainNavigation() : const WelcomeScreen(),
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) => const SplashScreen();
 }

@@ -18,6 +18,11 @@ env/
 build/
 *.iml
 
+# Generated platform files
+macos/Flutter/GeneratedPluginRegistrant.swift
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugins.cmake
+
 # Android
 android/.gradle/
 android/local.properties

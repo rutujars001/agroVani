@@ -41,7 +41,8 @@ const _voiceCropMap = {
 };
 
 class CropsScreen extends StatefulWidget {
-  const CropsScreen({super.key});
+  final String? initialCrop;
+  const CropsScreen({super.key, this.initialCrop});
   @override
   State<CropsScreen> createState() => _CropsScreenState();
 }
@@ -64,6 +65,15 @@ class _CropsScreenState extends State<CropsScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.initialCrop != null) {
+      _selectedKey = widget.initialCrop;
+      _fetchAdvice(widget.initialCrop!, _activeTopic);
+    }
+  }
+
+  @override
   void dispose() {
     _tts.stop();
     super.dispose();
@@ -75,7 +85,7 @@ class _CropsScreenState extends State<CropsScreen> {
     setState(() => _loading = true);
     try {
       final res = await http.post(
-        Uri.parse('http://127.0.0.1:5000/query'),
+        Uri.parse('http://10.144.10.112:5000/query'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'query': '$cropKey $topic'}),
       );

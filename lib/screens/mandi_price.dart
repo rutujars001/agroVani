@@ -78,7 +78,7 @@ class _BazaarScreenState extends State<BazaarScreen> {
   Future<void> _fetch() async {
     setState(() { _loading = true; _error = null; });
     try {
-      final res = await http.get(Uri.parse('http://127.0.0.1:5000/mandi-prices?state=Maharashtra'));
+      final res = await http.get(Uri.parse('http://10.144.10.112:5000/mandi-prices?state=Maharashtra'));
       if (res.statusCode != 200) throw Exception('HTTP ${res.statusCode}');
       final payload = json.decode(res.body) as Map<String, dynamic>;
       final data = payload['data'] as List<dynamic>? ?? [];

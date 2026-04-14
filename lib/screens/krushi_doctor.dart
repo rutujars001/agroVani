@@ -77,7 +77,7 @@ class _KrushiDoctorState extends State<KrushiDoctor> {
     super.initState();
     // Greet and prompt on open
     Future.delayed(const Duration(milliseconds: 600), () {
-      _tts.speak('खालील पिकांमधून एक पीक निवडा.');
+      _tts.speak('नमस्कार! AgroVani मध्ये आपले स्वागत आहे.');
     });
   }
 
@@ -109,7 +109,7 @@ class _KrushiDoctorState extends State<KrushiDoctor> {
     setState(() { _loading = true; _step = _Step.result; _advice = ''; });
     try {
       final res = await http.post(
-        Uri.parse('http://127.0.0.1:5000/query'),
+        Uri.parse('http://10.144.10.112:5000/query'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'query': '$_selectedCrop $_selectedTopic'}),
       );

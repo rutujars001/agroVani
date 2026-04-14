@@ -1,110 +1,108 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/polly_tts.dart';
 import '../widgets/voice_mic_bar.dart';
-import 'splash_screen.dart';
 import 'weather_screen.dart';
 import 'yojana_screen.dart';
 import 'mandi_price.dart';
 import 'calculator_screen.dart';
 import 'krushi_doctor.dart';
 import 'crops_screen.dart';
-
-final String apiKey =
-    "AIzaSyAThZFmxDZhqfEYRAto_FwB9XHyzrdWgWU"; // Paste your API Key here
-final String projectId = "agrovani-assistant-gmeh";
+import 'profile_screen.dart';
+import 'news_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
-  final Color darkGreen = const Color(0xFF1B5E20);
-  final Color creamColor = const Color(0xFFF3F1E7);
+class _HomeScreenState extends State<HomeScreen> {
+  final PollyTts _tts = PollyTts();
+  static const _teal = Color(0xFF00897B);
 
-  bool _isListening = false;
-  bool _speechReady = false;
-  String _recognizedText = "शेतकऱ्याचा आवाज येथे दिसेल...";
-  String _dialogflowResponse = "डायलॉगफ्लो उत्तर येथे दिसेल...";
-  String _suggestion = '';
-  String _suggestedCrop = '';
-  bool _loadingSuggestion = false;
-  String _selectedSoil = 'black';
+  String _userName = '';
+  List<String> _userCrops = [];
+  String _soilType = 'black';
+  double _temp = 0;
+  String _condition = '';
+  int _humidity = 0;
+  bool _loadingWeather = true;
   List<Map<String, dynamic>> _news = [];
   bool _loadingNews = false;
-  final stt.SpeechToText _speech = stt.SpeechToText();
-  final PollyTts _flutterTts = PollyTts();
-
-  static const _soilOptions = [
-    {'key': 'black',    'label': 'काळी माती'},
-    {'key': 'red',      'label': 'लाल माती'},
-    {'key': 'alluvial', 'label': 'गाळाची माती'},
-    {'key': 'sandy',    'label': 'वालुकामय'},
-    {'key': 'loamy',    'label': 'चिकणमाती'},
-  ];
-
-  late AnimationController _animationController;
-  late Animation<double> _pulseAnimation;
+  String _suggestion = '';
+  bool _loadingSuggestion = false;
+  String _voiceResponse = '';
 
   @override
   void initState() {
     super.initState();
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    )..repeat(reverse: true);
-
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-
-    _initSpeech();
-    _fetchSuggestion();
+    _loadUser();
+    _fetchWeather();
     _fetchNews();
-  }
-
-  Future<void> _initSpeech() async {
-    _speechReady = await _speech.initialize(
-      onStatus: (status) {
-        if (!mounted) return;
-        if (status == 'done' || status == 'notListening') {
-          setState(() => _isListening = false);
-        }
-      },
-      onError: (error) {
-        if (!mounted) return;
-        setState(() => _isListening = false);
-      },
-    );
-    setState(() {});
   }
 
   @override
   void dispose() {
-    _flutterTts.stop();
-    _animationController.dispose();
+    _tts.stop();
     super.dispose();
+  }
+
+  Future<void> _loadUser() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    if (!mounted) return;
+    final data = doc.data() ?? {};
+    setState(() {
+      _userName  = (data['name'] ?? '').toString();
+      _userCrops = List<String>.from(data['crops'] ?? []);
+      _soilType  = _soilKey((data['soil_type'] ?? '').toString());
+    });
+    _fetchSuggestion();
+  }
+
+  String _soilKey(String s) {
+    if (s.contains('काळी')) return 'black';
+    if (s.contains('लाल')) return 'red';
+    if (s.contains('गाळ')) return 'alluvial';
+    if (s.contains('वालु')) return 'sandy';
+    return 'loamy';
+  }
+
+  Future<void> _fetchWeather() async {
+    try {
+      final res = await http.get(Uri.parse(
+          'https://api.openweathermap.org/data/2.5/weather?q=Solapur&appid=482a3a616b59b6ad77409e8aed90da11&units=metric'));
+      final d = json.decode(res.body);
+      if (!mounted) return;
+      setState(() {
+        _temp      = (d['main']['temp'] as num).toDouble();
+        _humidity  = d['main']['humidity'] as int;
+        _condition = (d['weather'] as List).first['main'].toString();
+        _loadingWeather = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loadingWeather = false);
+    }
   }
 
   Future<void> _fetchNews() async {
     setState(() => _loadingNews = true);
     try {
-      final res = await http.get(Uri.parse('http://127.0.0.1:5000/agri-news'));
+      final res = await http.get(Uri.parse('http://10.144.10.112:5000/agri-news'));
       final payload = json.decode(res.body) as Map<String, dynamic>;
       final list = payload['news'] as List<dynamic>? ?? [];
+      if (!mounted) return;
       setState(() {
         _news = list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
         _loadingNews = false;
       });
     } catch (_) {
-      setState(() => _loadingNews = false);
+      if (mounted) setState(() => _loadingNews = false);
     }
   }
 
@@ -112,546 +110,401 @@ class _HomeScreenState extends State<HomeScreen>
     setState(() => _loadingSuggestion = true);
     try {
       final res = await http.post(
-        Uri.parse('http://127.0.0.1:5000/recommend'),
+        Uri.parse('http://10.144.10.112:5000/recommend'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'soil_type': _selectedSoil, 'city': 'Solapur'}),
+        body: json.encode({'soil_type': _soilType, 'city': 'Solapur'}),
       );
       final payload = json.decode(res.body) as Map<String, dynamic>;
+      if (!mounted) return;
       setState(() {
-        _suggestion     = payload['message'] ?? '';
-        _suggestedCrop  = payload['crop']    ?? '';
+        _suggestion = (payload['message'] ?? '').toString().replaceAll('**', '').replaceAll('🌱 स्मार्ट सूचना: ', '');
         _loadingSuggestion = false;
       });
     } catch (_) {
-      setState(() => _loadingSuggestion = false);
+      if (mounted) setState(() => _loadingSuggestion = false);
     }
   }
 
-  Future<void> _speakDialogflowResponse(String responseText) async {
-    if (responseText.trim().isEmpty) return;
-    await _flutterTts.speak(responseText);
-  }
-
-  Future<void> _fetchDialogflowReply(String userQuery) async {
-    final cleanQuery = userQuery.trim();
-    if (cleanQuery.isEmpty) return;
-
-    setState(() {
-      _dialogflowResponse = "उत्तर मिळवत आहे...";
-    });
-
+  Future<void> _handleVoice(String query) async {
     try {
-      final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/query'),
+      final res = await http.post(
+        Uri.parse('http://10.144.10.112:5000/query'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'query': cleanQuery}),
+        body: json.encode({'query': query}),
       );
-
-      if (response.statusCode != 200) {
-        throw Exception("HTTP ${response.statusCode}");
-      }
-
-      final Map<String, dynamic> payload = json.decode(response.body);
+      final payload = json.decode(res.body) as Map<String, dynamic>;
       final reply = (payload['fulfillmentText'] ?? '').toString();
       if (!mounted) return;
-      setState(() {
-        _dialogflowResponse = reply.isEmpty
-            ? "उत्तर मिळाले नाही. कृपया पुन्हा प्रयत्न करा."
-            : reply;
-      });
-
-      await _speakDialogflowResponse(_dialogflowResponse);
+      setState(() => _voiceResponse = reply);
+      await _tts.speak(reply);
     } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _dialogflowResponse =
-            "सर्व्हरला कनेक्ट होता आले नाही. Flask server चालू आहे का तपासा.";
-      });
+      setState(() => _voiceResponse = 'सर्व्हरशी कनेक्ट होता आले नाही.');
     }
   }
 
-  Future<void> _startListening() async {
-    if (!_speechReady) {
-      setState(() => _recognizedText = "स्पीच ओळख उपलब्ध नाही.");
-      return;
-    }
-
-    // Stop TTS so it doesn't listen to its own voice
-    await _flutterTts.stop();
-
-    setState(() {
-      _isListening = true;
-      _recognizedText = "ऐकत आहे...";
-    });
-
-    await _speech.listen(
-      localeId: 'mr_IN',
-      listenMode: stt.ListenMode.confirmation,
-      partialResults: true,
-      onResult: (result) {
-        if (!mounted) return;
-        setState(() {
-          _recognizedText = result.recognizedWords.isEmpty
-              ? "ऐकत आहे..."
-              : result.recognizedWords;
-        });
-        // Auto-send when speech recognition is finalized
-        if (result.finalResult && result.recognizedWords.isNotEmpty) {
-          _fetchDialogflowReply(result.recognizedWords);
-        }
-      },
-    );
+  String _weatherEmoji() {
+    final c = _condition.toLowerCase();
+    if (c.contains('rain') || c.contains('drizzle')) return '🌧️';
+    if (c.contains('thunder')) return '⛈️';
+    if (c.contains('cloud')) return '⛅';
+    if (c.contains('snow')) return '❄️';
+    if (c.contains('mist') || c.contains('fog')) return '🌫️';
+    return _temp >= 34 ? '☀️' : '🌤️';
   }
 
-  void _stopListening() {
-    _speech.stop();
-    if (!mounted) return;
-    setState(() => _isListening = false);
+  String _cropIcon(String key) {
+    const map = {
+      'Cotton': '🌱', 'Jowar': '🌾', 'Wheat': '🌿', 'Onion': '🧅',
+      'Soybean': '🫛', 'Tur': '🫘', 'Sugarcane': '🎋', 'Tomato': '🍅',
+      'Gram': '🫘', 'Maize': '🌽', 'Groundnut': '🥜', 'Pomegranate': '🍎',
+      'Sunflower': '🌻', 'Bajra': '🌾', 'Grape': '🍇',
+    };
+    return map[key] ?? '🌿';
   }
 
-  Future<void> _toggleMic() async {
-    if (_isListening) {
-      _stopListening();
-    } else {
-      await _startListening();
-    }
+  String _cropLabel(String key) {
+    const map = {
+      'Cotton': 'कापूस', 'Jowar': 'ज्वारी', 'Wheat': 'गहू', 'Onion': 'कांदा',
+      'Soybean': 'सोयाबीन', 'Tur': 'तूर', 'Sugarcane': 'ऊस', 'Tomato': 'टोमॅटो',
+      'Gram': 'हरभरा', 'Maize': 'मका', 'Groundnut': 'शेंगदाणा', 'Pomegranate': 'डाळिंब',
+      'Sunflower': 'सूर्यफूल', 'Bajra': 'बाजरी', 'Grape': 'द्राक्षे',
+    };
+    return map[key] ?? key;
   }
 
   @override
   Widget build(BuildContext context) {
+    final firstName = _userName.split(' ').first;
+    final hour = DateTime.now().hour;
+    final greeting = hour < 12 ? 'सुप्रभात' : hour < 17 ? 'नमस्कार' : 'शुभ संध्या';
+
     return Scaffold(
-      backgroundColor: creamColor,
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-      /// 🔝 APP BAR
-      appBar: AppBar(
-        backgroundColor: darkGreen,
-        centerTitle: true,
-        elevation: 2,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const SplashScreen()),
-            );
-          },
-        ),
-        title: const Text(
-          "नमस्कार शेतकरी मित्रा!",
-          style: TextStyle(color: Colors.white, fontSize: 20),
-        ),
-      ),
-
-      /// 📱 BODY
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-
-            /// 🎤 MIC BUTTON
-            GestureDetector(
-              onTap: _toggleMic,
-              child: ScaleTransition(
-                scale: _pulseAnimation,
-                child: Container(
-                  height: 140,
-                  width: 140,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green
-                            .withValues(alpha: _isListening ? 0.6 : 0.3),
-                        blurRadius: 25,
-                        spreadRadius: 3,
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    _isListening ? Icons.mic : Icons.mic_none,
-                    size: 70,
-                    color: _isListening ? Colors.red : Colors.green,
+            // ── Header ───────────────────────────────────────────────────────
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              child: Row(children: [
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('$greeting, ${firstName.isEmpty ? 'शेतकरी' : firstName}!',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.black87)),
+                    const Text('आजची शेती माहिती पाहा',
+                        style: TextStyle(fontSize: 12, color: Colors.black45)),
+                  ]),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    await Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const ProfileScreen()));
+                    await _loadUser();
+                  },
+                  child: Container(
+                    width: 42, height: 42,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE0F2F1),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: _teal.withValues(alpha: 0.4), width: 1.5),
+                    ),
+                    child: const Center(child: Icon(Icons.person_rounded, color: _teal, size: 22)),
                   ),
                 ),
+              ]),
+            ),
+
+            const SizedBox(height: 8),
+
+            // ── Voice Bar ─────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: VoiceMicBar(
+                tts: _tts,
+                hintText: 'बोला: "कापूस रोग" किंवा "हवामान सांग"',
+                onResult: _handleVoice,
               ),
             ),
 
-            const SizedBox(height: 10),
-
-            Text(
-              _isListening ? "ऐकत आहे..." : "बोलण्यासाठी टॅप करा",
-              style: TextStyle(
-                fontSize: 16,
-                color: _isListening ? Colors.green : Colors.black87,
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            VoiceMicBar(
-              tts: _flutterTts,
-              hintText: 'बोला: "ज्वारी भाव" किंवा "हवामान सांग"',
-              onResult: _fetchDialogflowReply,
-            ),
-
-            const SizedBox(height: 10),
-
-            if (_dialogflowResponse != "डायलॉगफ्लो उत्तर येथे दिसेल...")
+            if (_voiceResponse.isNotEmpty) ...[
+              const SizedBox(height: 8),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade50,
+                    color: const Color(0xFFE0F2F1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.green.shade200),
+                    border: Border.all(color: _teal.withValues(alpha: 0.2)),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _dialogflowResponse,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: "उत्तर ऐका",
-                        onPressed: () =>
-                            _speakDialogflowResponse(_dialogflowResponse),
-                        icon: const Icon(Icons.volume_up, color: Colors.green),
-                      ),
-                    ],
-                  ),
+                  child: Row(children: [
+                    const Icon(Icons.smart_toy_outlined, color: _teal, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(_voiceResponse,
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black87))),
+                    GestureDetector(
+                      onTap: () => _tts.speak(_voiceResponse),
+                      child: const Icon(Icons.volume_up_rounded, color: _teal, size: 18),
+                    ),
+                  ]),
                 ),
               ),
+            ],
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 16),
 
-            // ── Smart Suggestion Card ─────────────────────────────────────────────────
+            // ── Weather + Suggestion ──────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
-                ),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  // Header
-                  const Row(children: [
-                    Text('🌱', style: TextStyle(fontSize: 22)),
-                    SizedBox(width: 8),
-                    Text('स्मार्ट सूचना',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
-                  ]),
-                  const SizedBox(height: 10),
-                  // Soil selector
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _soilOptions.map((s) {
-                        final sel = _selectedSoil == s['key'];
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() => _selectedSoil = s['key']!);
-                            _fetchSuggestion();
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: sel ? Colors.white : Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(s['label']!,
-                                style: TextStyle(
-                                    color: sel ? const Color(0xFF1B5E20) : Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12)),
-                          ),
-                        );
-                      }).toList(),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                // Weather
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const WeatherScreen())),
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: _teal,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: _loadingWeather
+                          ? const SizedBox(height: 80,
+                              child: Center(child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)))
+                          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              Row(children: [
+                                Text(_weatherEmoji(), style: const TextStyle(fontSize: 24)),
+                                const Spacer(),
+                                const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 12),
+                              ]),
+                              const SizedBox(height: 8),
+                              Text('${_temp.toStringAsFixed(0)}°C',
+                                  style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+                              Text(_condition,
+                                  style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                              Text('आर्द्रता $_humidity%',
+                                  style: const TextStyle(color: Colors.white60, fontSize: 11)),
+                            ]),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  // Suggestion content
-                  _loadingSuggestion
-                      ? const Center(child: CircularProgressIndicator(color: Colors.white))
-                      : _suggestion.isEmpty
-                          ? const Text('सूचना मिळवत आहे...',
-                              style: TextStyle(color: Colors.white70))
-                          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              Text(
-                                _suggestion.replaceAll('**', ''),
-                                style: const TextStyle(color: Colors.white, fontSize: 13.5, height: 1.6),
-                              ),
-                              const SizedBox(height: 10),
-                              Row(children: [
-                                GestureDetector(
-                                  onTap: () => _flutterTts.speak(_suggestion.replaceAll('**', '')),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                                      Icon(Icons.volume_up_rounded, color: Colors.white, size: 16),
-                                      SizedBox(width: 6),
-                                      Text('ऐका', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                                    ]),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: _fetchSuggestion,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                                      Icon(Icons.refresh_rounded, color: Colors.white, size: 16),
-                                      SizedBox(width: 6),
-                                      Text('अपडेट', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                                    ]),
-                                  ),
-                                ),
-                              ]),
-                            ]),
-                ]),
-              ),
+                ),
+                const SizedBox(width: 10),
+                // Smart suggestion
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Row(children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F5E9),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.tips_and_updates_rounded, color: Color(0xFF2E7D32), size: 16),
+                        ),
+                        const SizedBox(width: 6),
+                        const Text('सूचना', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.black87)),
+                      ]),
+                      const SizedBox(height: 8),
+                      _loadingSuggestion
+                          ? const LinearProgressIndicator(color: _teal)
+                          : Text(
+                              _suggestion.isEmpty ? 'लोड होत आहे...' : _suggestion,
+                              style: const TextStyle(fontSize: 11, color: Colors.black54, height: 1.5),
+                              maxLines: 5, overflow: TextOverflow.ellipsis,
+                            ),
+                    ]),
+                  ),
+                ),
+              ]),
             ),
 
             const SizedBox(height: 20),
 
-            /// 🔲 FEATURES GRID
+            // ── My Crops ─────────────────────────────────────────────────────
+            if (_userCrops.isNotEmpty) ...[
+              _sectionHeader('माझी पिके', null),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 88,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: _userCrops.length,
+                  itemBuilder: (_, i) {
+                    final crop = _userCrops[i];
+                    return GestureDetector(
+                      onTap: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => CropsScreen(initialCrop: crop))),
+                      child: Container(
+                        width: 76,
+                        margin: const EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: _teal.withValues(alpha: 0.25)),
+                          boxShadow: [BoxShadow(color: _teal.withValues(alpha: 0.06), blurRadius: 6)],
+                        ),
+                        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                          Text(_cropIcon(crop), style: const TextStyle(fontSize: 26)),
+                          const SizedBox(height: 4),
+                          Text(_cropLabel(crop),
+                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black87),
+                              textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ]),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+
+            // ── Services ─────────────────────────────────────────────────────
+            _sectionHeader('सेवा', null),
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
+              child: GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 3,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 1.05,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const CropsScreen()),
-                          ),
-                          child:
-                              featureBox(Icons.eco, "पीक माहिती", Colors.green),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const WeatherScreen()),
-                          ),
-                          child: featureBox(Icons.cloud, "हवामान", Colors.blue),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const YojanaScreen()),
-                          ),
-                          child:
-                              featureBox(Icons.policy, "योजना", Colors.orange),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const BazaarScreen()),
-                          ),
-                          child: featureBox(
-                              Icons.trending_up, "बाजारभाव", Colors.purple),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const CalculatorScreen()),
-                          ),
-                          child: featureBox(
-                              Icons.calculate, "खत गणक", Colors.teal),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const KrushiDoctor()),
-                          ),
-                          child: featureBox(Icons.medical_services,
-                              "कृषी डॉक्टर", Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
+                  _serviceCard('🩺', 'कृषी डॉक्टर', const KrushiDoctor(), const Color(0xFFFCE4EC), const Color(0xFFE91E63)),
+                  _serviceCard('🌾', 'पीक माहिती', const CropsScreen(), const Color(0xFFE8F5E9), const Color(0xFF2E7D32)),
+                  _serviceCard('📊', 'बाजारभाव', const BazaarScreen(), const Color(0xFFEDE7F6), const Color(0xFF6A1B9A)),
+                  _serviceCard('🌤️', 'हवामान', const WeatherScreen(), const Color(0xFFE3F2FD), const Color(0xFF1565C0)),
+                  _serviceCard('🧪', 'खत गणक', const CalculatorScreen(), const Color(0xFFE0F2F1), _teal),
+                  _serviceCard('📋', 'योजना', const YojanaScreen(), const Color(0xFFFFF8E1), const Color(0xFFF57F17)),
                 ],
               ),
             ),
 
             const SizedBox(height: 20),
 
-            // ── Latest Agri News ─────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(children: [
-                const Text('📰 ताजे कृषी बातम्या',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
-                const Spacer(),
-                GestureDetector(
-                  onTap: _fetchNews,
-                  child: const Icon(Icons.refresh_rounded, size: 18, color: Color(0xFF1B5E20)),
-                ),
-              ]),
-            ),
+            // ── News ─────────────────────────────────────────────────────────
+            _sectionHeader('ताजे कृषी बातम्या', _fetchNews),
             const SizedBox(height: 10),
-            _loadingNews
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFF1B5E20)))
-                : _news.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('बातम्या मिळवत आहे...',
-                            style: TextStyle(color: Colors.black45)),
-                      )
-                    : SizedBox(
-                        height: 140,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: _news.length,
-                          itemBuilder: (_, i) {
-                            final item = _news[i];
-                            return Container(
-                              width: 260,
-                              margin: const EdgeInsets.only(right: 12),
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.green.shade100),
-                                boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Source tag
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF1B5E20).withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      '✅ Source: ${item['source']}',
-                                      style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF1B5E20)),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Headline
-                                  Expanded(
-                                    child: Text(
-                                      item['title'] as String,
-                                      style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          height: 1.4),
-                                      maxLines: 4,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  if ((item['date'] as String).isNotEmpty)
-                                    Text(item['date'] as String,
-                                        style: const TextStyle(
-                                            fontSize: 10, color: Colors.black38)),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+            if (_loadingNews)
+              const Center(child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator(color: _teal, strokeWidth: 2)))
+            else if (_news.isEmpty)
+              const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Text('बातम्या उपलब्ध नाहीत.', style: TextStyle(color: Colors.black45)))
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: _news.length,
+                itemBuilder: (_, i) {
+                  final item = _news[i];
+                  return GestureDetector(
+                    onTap: () => Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => NewsDetailScreen(news: item))),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.grey.shade100),
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6, offset: const Offset(0, 2))],
                       ),
-
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 📦 FEATURE BOX (UPDATED UI)
-  Widget featureBox(IconData icon, String text, Color color) {
-    return Container(
-      height: 110,
-      decoration: BoxDecoration(
-        color: creamColor.withValues(alpha: 0.6), // 👈 subtle card color
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.25),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 38, color: color),
-            const SizedBox(height: 8),
-            Text(
-              text,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade800,
+                      child: Row(children: [
+                        Container(
+                          width: 44, height: 44,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0F2F1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Center(child: Icon(Icons.article_rounded, color: _teal, size: 22)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: _teal.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text('✅ ${item['source']}',
+                                  style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: _teal)),
+                            ),
+                            const SizedBox(height: 5),
+                            Text((item['title'] ?? '').toString(),
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, height: 1.4, color: Colors.black87),
+                                maxLines: 2, overflow: TextOverflow.ellipsis),
+                            if ((item['date'] ?? '').toString().isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 3),
+                                child: Text((item['date'] ?? '').toString(),
+                                    style: const TextStyle(fontSize: 10, color: Colors.black38)),
+                              ),
+                          ]),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.chevron_right_rounded, color: Colors.black26, size: 20),
+                      ]),
+                    ),
+                  );
+                },
               ),
-            ),
-          ],
+
+            const SizedBox(height: 30),
+          ]),
         ),
       ),
     );
   }
 
+  Widget _sectionHeader(String title, VoidCallback? onRefresh) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(children: [
+        Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.black87)),
+        const Spacer(),
+        if (onRefresh != null)
+          GestureDetector(
+            onTap: onRefresh,
+            child: const Icon(Icons.refresh_rounded, size: 18, color: _teal),
+          ),
+      ]),
+    );
+  }
+
+  Widget _serviceCard(String emoji, String label, Widget screen, Color bg, Color color) {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withValues(alpha: 0.15)),
+        ),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(emoji, style: const TextStyle(fontSize: 26)),
+          const SizedBox(height: 5),
+          Text(label,
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: color),
+              textAlign: TextAlign.center, maxLines: 2),
+        ]),
+      ),
+    );
+  }
 }
