@@ -1,0 +1,473 @@
+{
+  "Cotton": [
+    {
+      "disease_name": "Bacterial Blight",
+      "disease_name_mr": "जिवाणूजन्य करपा",
+      "symptom_keywords": [
+        "black spots",
+        "leaf spots",
+        "angular spots",
+        "water soaked spots",
+        "vein blackening",
+        "blight",
+        "पानावर काळे डाग",
+        "काळे डाग",
+        "पानांवर डाग",
+        "पान करपत आहे",
+        "शिरा काळ्या पडणे"
+      ],
+      "symptom_phrases_mr": [
+        "कापसाच्या पानावर काळे डाग आहेत",
+        "पानांवर कोनीय डाग दिसत आहेत",
+        "पानांवर पाणथळ डाग दिसतात",
+        "पानांच्या शिरा काळ्या पडल्या आहेत"
+      ],
+      "causes": [
+        "bacterial infection",
+        "high humidity",
+        "infected plant material"
+      ],
+      "what_happened": "कापसावर जिवाणूजन्य करपा रोगाची शक्यता आहे.",
+      "what_to_do_now": [
+        "जास्त बाधित पाने आणि फांद्या काढून टाका",
+        "वरून पाणी देणे टाळा",
+        "शेतात निचरा चांगला ठेवा"
+      ],
+      "recommended_medicines": [
+        "Copper oxychloride",
+        "Streptocycline"
+      ],
+      "dosage_note": "स्थानिक कृषी तज्ज्ञ किंवा उत्पादन लेबलप्रमाणे मात्रा वापरा.",
+      "prevention": [
+        "स्वच्छ आणि निरोगी बियाणे वापरा",
+        "रोगट अवशेष शेतातून काढून टाका",
+        "जास्त आर्द्रता टाळा"
+      ],
+      "severity": "medium"
+    },
+    {
+      "disease_name": "Fusarium Wilt",
+      "disease_name_mr": "फ्युजेरियम वाळवी",
+      "symptom_keywords": [
+        "wilting",
+        "yellow leaves",
+        "plant drooping",
+        "root rot",
+        "झाड कोमेजत आहे",
+        "पाने पिवळी पडत आहेत",
+        "झाड वाळत आहे"
+      ],
+      "symptom_phrases_mr": [
+        "कापसाचे झाड कोमेजत आहे",
+        "पाने पिवळी पडून झाड वाळत आहे"
+      ],
+      "causes": [
+        "soil borne fungus",
+        "infected soil",
+        "poor soil health"
+      ],
+      "what_happened": "कापसावर फ्युजेरियम वाळवीचा प्रादुर्भाव असू शकतो.",
+      "what_to_do_now": [
+        "जास्त बाधित झाडे वेगळी काढा",
+        "पाण्याचा अतिरेक टाळा",
+        "मुळाजवळील जमीन तपासा"
+      ],
+      "recommended_medicines": [
+        "Carbendazim",
+        "Trichoderma based treatment"
+      ],
+      "dosage_note": "बीजप्रक्रिया किंवा मुळाजवळ वापरासाठी स्थानिक मार्गदर्शन घ्या.",
+      "prevention": [
+        "पीक फेरपालट करा",
+        "सुपीक आणि निचऱ्याची जमीन ठेवा",
+        "प्रतिरोधक वाण वापरण्याचा विचार करा"
+      ],
+      "severity": "high"
+    },
+    {
+      "disease_name": "Alternaria Leaf Blight",
+      "disease_name_mr": "अल्टरनेरिया पान करपा",
+      "symptom_keywords": [
+        "brown spots",
+        "target spots",
+        "dry leaf spots",
+        "पानावर तपकिरी डाग",
+        "पाने सुकत आहेत",
+        "वर्तुळाकार डाग"
+      ],
+      "symptom_phrases_mr": [
+        "कापसाच्या पानावर तपकिरी डाग आले आहेत",
+        "डाग वाढत जाऊन पाने सुकत आहेत"
+      ],
+      "causes": [
+        "fungal infection",
+        "humid weather"
+      ],
+      "what_happened": "कापसावर अल्टरनेरिया पान करपा रोगाची शक्यता आहे.",
+      "what_to_do_now": [
+        "जुनी बाधित पाने काढा",
+        "जास्त गर्दी टाळा",
+        "पावसानंतर रोग निरीक्षण वाढवा"
+      ],
+      "recommended_medicines": [
+        "Mancozeb",
+        "Chlorothalonil"
+      ],
+      "dosage_note": "फवारणीपूर्वी शिफारस केलेली मात्रा तपासा.",
+      "prevention": [
+        "हवेशीर लागवड ठेवा",
+        "रोगट अवशेष नष्ट करा"
+      ],
+      "severity": "medium"
+    }
+  ],
+  "Onion": [
+    {
+      "disease_name": "Purple Blotch",
+      "disease_name_mr": "जांभळा डाग रोग",
+      "symptom_keywords": [
+        "purple blotch",
+        "white dots",
+        "purple spots",
+        "black rings",
+        "leaf drying",
+        "पांढरे ठिपके",
+        "जांभळे डाग",
+        "काळी वर्तुळे",
+        "पाने टोकापासून सुकत आहेत"
+      ],
+      "symptom_phrases_mr": [
+        "कांद्याच्या पानांवर जांभळे डाग आहेत",
+        "पानांवर पांढरे ठिपके येऊन नंतर काळी वर्तुळे पडत आहेत",
+        "कांद्याची पाने टोकापासून सुकत आहेत"
+      ],
+      "causes": [
+        "fungal infection",
+        "high humidity",
+        "infected debris"
+      ],
+      "what_happened": "कांद्यावर जांभळा डाग रोगाची शक्यता आहे.",
+      "what_to_do_now": [
+        "बाधित पाने वेगळी करा",
+        "पानांवर जास्त वेळ ओलावा राहू देऊ नका",
+        "शेत स्वच्छ ठेवा"
+      ],
+      "recommended_medicines": [
+        "Copper oxychloride",
+        "Chlorothalonil",
+        "Mancozeb",
+        "Zineb"
+      ],
+      "dosage_note": "TNAU मध्ये Copper oxychloride 0.25%, Chlorothalonil 0.2%, Zineb 0.2% आणि Mancozeb 0.2% व्यवस्थापनात नमूद आहे; प्रत्यक्ष वापरापूर्वी स्थानिक शिफारस तपासा.",
+      "prevention": [
+        "बियाणे/रोपे स्वच्छ वापरा",
+        "रोगट अवशेष काढून टाका",
+        "हवेशीर अंतर ठेवा"
+      ],
+      "severity": "medium"
+    },
+    {
+      "disease_name": "Downy Mildew",
+      "disease_name_mr": "डाउनी मिल्ड्यू",
+      "symptom_keywords": [
+        "pale patches",
+        "yellow patches",
+        "grey growth",
+        "leaf collapse",
+        "पिवळे डाग",
+        "राखाडी बुरशी",
+        "पाने वाकत आहेत",
+        "पाने पडत आहेत"
+      ],
+      "symptom_phrases_mr": [
+        "कांद्याच्या पानांवर पिवळे फिकट डाग दिसत आहेत",
+        "पानांवर राखाडी थर दिसत आहे"
+      ],
+      "causes": [
+        "fungal-like pathogen",
+        "cool humid conditions"
+      ],
+      "what_happened": "कांद्यावर डाउनी मिल्ड्यू रोगाची शक्यता आहे.",
+      "what_to_do_now": [
+        "सकाळी पिक निरीक्षण करा",
+        "दाटी आणि अति ओलावा कमी करा",
+        "रोगट भाग काढून टाका"
+      ],
+      "recommended_medicines": [
+        "Metalaxyl based fungicide",
+        "Mancozeb combination"
+      ],
+      "dosage_note": "स्थानिक कृषी केंद्राच्या शिफारशीप्रमाणे फवारणी करा.",
+      "prevention": [
+        "निचरा चांगला ठेवा",
+        "अति आर्द्रता टाळा"
+      ],
+      "severity": "high"
+    },
+    {
+      "disease_name": "Stemphylium Blight",
+      "disease_name_mr": "स्टेमफिलियम करपा",
+      "symptom_keywords": [
+        "elongated lesions",
+        "brown spots",
+        "tip drying",
+        "पाने तपकिरी पडत आहेत",
+        "लांबट डाग",
+        "पाने टोकापासून वाळत आहेत"
+      ],
+      "symptom_phrases_mr": [
+        "कांद्याच्या पानांवर लांबट तपकिरी डाग आहेत",
+        "पाने टोकापासून वाळत आहेत"
+      ],
+      "causes": [
+        "fungal infection",
+        "stress conditions"
+      ],
+      "what_happened": "कांद्यावर स्टेमफिलियम करपा असू शकतो.",
+      "what_to_do_now": [
+        "बाधित पाने काढा",
+        "जास्त ओलसरपणा कमी करा",
+        "पीकावर नियमित लक्ष ठेवा"
+      ],
+      "recommended_medicines": [
+        "Mancozeb",
+        "Azoxystrobin based fungicide"
+      ],
+      "dosage_note": "लेबलप्रमाणे मात्रा पाळा.",
+      "prevention": [
+        "हवेशीर लागवड",
+        "पीक अवशेष व्यवस्थापन"
+      ],
+      "severity": "medium"
+    }
+  ],
+  "Soybean": [
+    {
+      "disease_name": "Rust",
+      "disease_name_mr": "गंज रोग",
+      "symptom_keywords": [
+        "rust",
+        "yellow spots",
+        "brown pustules",
+        "leaf fall",
+        "पिवळे डाग",
+        "तपकिरी बारीक ठिपके",
+        "पाने गळत आहेत",
+        "गंज"
+      ],
+      "symptom_phrases_mr": [
+        "सोयाबीनच्या पानांवर पिवळे डाग आहेत",
+        "पानांच्या खाली तपकिरी बारीक उठाव दिसत आहेत",
+        "पाने लवकर गळत आहेत"
+      ],
+      "causes": [
+        "fungal infection",
+        "humid weather"
+      ],
+      "what_happened": "सोयाबीनवर गंज रोगाची शक्यता आहे.",
+      "what_to_do_now": [
+        "रोगाचा प्रसार वाढण्यापूर्वी निरीक्षण वाढवा",
+        "जास्त बाधित पाने तपासा",
+        "फवारणीचा सल्ला स्थानिक तज्ज्ञांकडून घ्या"
+      ],
+      "recommended_medicines": [
+        "Hexaconazole",
+        "Propiconazole",
+        "Tebuconazole"
+      ],
+        "dosage_note": "स्थानिक शिफारस व हवामानानुसार फवारणी करा.",
+        "prevention": [
+        "रोगनियंत्रणासाठी वेळेवर निरीक्षण",
+        "गर्दी कमी ठेवा"
+        ],
+        "severity": "high"
+    },
+    {
+      "disease_name": "Bacterial Blight",
+      "disease_name_mr": "जिवाणूजन्य करपा",
+      "symptom_keywords": [
+        "angular spots",
+        "water soaked lesions",
+        "yellow halo",
+        "पाणथळ डाग",
+        "कोनीय डाग",
+        "पिवळसर कडा"
+      ],
+      "symptom_phrases_mr": [
+        "सोयाबीनच्या पानांवर कोनीय डाग आहेत",
+        "पानांवर पाणथळ डाग दिसत आहेत"
+      ],
+      "causes": [
+        "bacterial infection",
+        "rain splash"
+      ],
+      "what_happened": "सोयाबीनवर जिवाणूजन्य करपा असू शकतो.",
+      "what_to_do_now": [
+        "अति ओलावा कमी करा",
+        "रोगट भाग वेगळा ठेवा",
+        "वरून पाणी देणे टाळा"
+      ],
+      "recommended_medicines": [
+        "Copper based bactericide"
+      ],
+      "dosage_note": "तज्ज्ञांच्या सल्ल्याने वापरा.",
+      "prevention": [
+        "निरोगी बियाणे वापरा",
+        "रोगट अवशेष व्यवस्थापन"
+      ],
+      "severity": "medium"
+    },
+    {
+      "disease_name": "Anthracnose",
+      "disease_name_mr": "अँथ्रॅक्नोज",
+      "symptom_keywords": [
+        "dark lesions",
+        "stem spots",
+        "pod spots",
+        "तपकिरी काळे डाग",
+        "खोडावर डाग",
+        "शेंगांवर डाग"
+      ],
+      "symptom_phrases_mr": [
+        "सोयाबीनच्या खोडावर काळे डाग आहेत",
+        "शेंगांवर तपकिरी डाग पडले आहेत"
+      ],
+      "causes": [
+        "fungal infection",
+        "infected residues"
+      ],
+      "what_happened": "सोयाबीनवर अँथ्रॅक्नोज रोगाची शक्यता आहे.",
+      "what_to_do_now": [
+        "रोगट भाग काढून टाका",
+        "बियाणे स्रोत तपासा",
+        "शेत निरीक्षण सुरू ठेवा"
+      ],
+      "recommended_medicines": [
+        "Carbendazim",
+        "Mancozeb"
+      ],
+      "dosage_note": "अधिकृत शिफारशीप्रमाणे फवारणी करा.",
+      "prevention": [
+        "बीजप्रक्रिया करा",
+        "पीक अवशेष नष्ट करा"
+      ],
+      "severity": "medium"
+    }
+  ],
+  "Tomato": [
+    {
+      "disease_name": "Early Blight",
+      "disease_name_mr": "लवकर करपा",
+      "symptom_keywords": [
+        "target spots",
+        "brown concentric rings",
+        "lower leaves yellow",
+        "leaf blight",
+        "वर्तुळाकार डाग",
+        "तपकिरी वर्तुळे",
+        "खालची पाने पिवळी पडत आहेत",
+        "पान करपा"
+      ],
+      "symptom_phrases_mr": [
+        "टोमॅटोच्या पानांवर वर्तुळाकार डाग आहेत",
+        "खालची पाने पिवळी पडून सुकत आहेत"
+      ],
+      "causes": [
+        "fungal infection",
+        "warm humid conditions"
+      ],
+      "what_happened": "टोमॅटोवर लवकर करपा रोगाची शक्यता आहे.",
+      "what_to_do_now": [
+        "खालची बाधित पाने काढा",
+        "पानांवर जास्त काळ ओलावा राहू देऊ नका",
+        "शेतात हवेशीरपणा ठेवा"
+      ],
+      "recommended_medicines": [
+        "Chlorothalonil",
+        "Mancozeb"
+      ],
+      "dosage_note": "लेबलनुसार मात्रा पाळा.",
+      "prevention": [
+        "पीक फेरपालट",
+        "रोगट अवशेष व्यवस्थापन"
+      ],
+      "severity": "medium"
+    },
+    {
+      "disease_name": "Late Blight",
+      "disease_name_mr": "उशिरा करपा",
+      "symptom_keywords": [
+        "water soaked lesions",
+        "dark blight",
+        "fruit rot",
+        "white growth underside",
+        "पाणथळ डाग",
+        "काळे डाग",
+        "फळ सडत आहे",
+        "पानाच्या खाली पांढरा थर"
+      ],
+      "symptom_phrases_mr": [
+        "टोमॅटोच्या पानांवर पाणथळ काळे डाग आहेत",
+        "फळांवर सड दिसत आहे"
+      ],
+      "causes": [
+        "oomycete infection",
+        "cool humid weather"
+      ],
+      "what_happened": "टोमॅटोवर उशिरा करपा रोगाची शक्यता आहे.",
+      "what_to_do_now": [
+        "बाधित पाने आणि फळे वेगळी करा",
+        "रोगाचा प्रसार जलद होऊ शकतो म्हणून तातडीने निरीक्षण करा",
+        "ओलावा कमी ठेवण्याचा प्रयत्न करा"
+      ],
+      "recommended_medicines": [
+        "Metalaxyl combination fungicide",
+        "Mancozeb"
+      ],
+      "dosage_note": "स्थानिक कृषी तज्ज्ञांच्या सल्ल्याने वापरा.",
+      "prevention": [
+        "नियमित निरीक्षण",
+        "अति ओलसर वातावरण टाळा"
+      ],
+      "severity": "high"
+    },
+    {
+      "disease_name": "Leaf Curl Virus",
+      "disease_name_mr": "पान गुंडाळी विषाणू",
+      "symptom_keywords": [
+        "leaf curling",
+        "upward curling",
+        "yellowing",
+        "stunted growth",
+        "पाने गुंडाळत आहेत",
+        "पाने वर वाकत आहेत",
+        "झाड खुंटले आहे",
+        "पिवळेपणा"
+      ],
+      "symptom_phrases_mr": [
+        "टोमॅटोची पाने गुंडाळत आहेत",
+        "झाडाची वाढ खुंटली आहे आणि पाने पिवळी पडत आहेत"
+      ],
+      "causes": [
+        "viral infection",
+        "whitefly transmission"
+      ],
+      "what_happened": "टोमॅटोवर पान गुंडाळी विषाणू रोगाची शक्यता आहे.",
+      "what_to_do_now": [
+        "जास्त बाधित झाडे वेगळी काढा",
+        "पांढरी माशी नियंत्रणावर लक्ष द्या",
+        "रोगग्रस्त रोपे ठेवू नका"
+      ],
+      "recommended_medicines": [
+        "Whitefly control insecticide",
+        "Yellow sticky traps"
+      ],
+      "dosage_note": "कीड नियंत्रणासाठी शिफारस केलेली औषधे व सापळे वापरा.",
+      "prevention": [
+        "पांढरी माशी नियंत्रण",
+        "निरोगी रोपे वापरा"
+      ],
+      "severity": "high"
+    }
+  ]
+}

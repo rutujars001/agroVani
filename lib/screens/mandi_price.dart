@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../utils/api_client.dart';
+import '../utils/app_config.dart';
 import '../utils/polly_tts.dart';
 import '../widgets/voice_mic_bar.dart';
 
@@ -66,8 +68,8 @@ class _BazaarScreenState extends State<BazaarScreen> {
   List<Map<String, dynamic>> _rows = [];
   String? _pinnedCrop;
 
-  static const _green = Color(0xFF1B5E20);
-  static const _cream = Color(0xFFF3F1E7);
+  static const _green = Color(0xFF00897B);
+  static const _cream = Color(0xFFF5F7F6);
 
   @override
   void initState() { super.initState(); _fetch(); }
@@ -78,8 +80,8 @@ class _BazaarScreenState extends State<BazaarScreen> {
   Future<void> _fetch() async {
     setState(() { _loading = true; _error = null; });
     try {
-      final res = await http.get(Uri.parse('http://10.144.10.112:5000/mandi-prices?state=Maharashtra'));
-      if (res.statusCode != 200) throw Exception('HTTP ${res.statusCode}');
+      final res = await apiGet('$kBaseUrl/mandi-prices?state=Maharashtra');
+      if (res.statusCode != 200) throw Exception('HTTP ${res.statusCode}: ${res.body}');
       final payload = json.decode(res.body) as Map<String, dynamic>;
       final data = payload['data'] as List<dynamic>? ?? [];
       setState(() {
@@ -93,8 +95,8 @@ class _BazaarScreenState extends State<BazaarScreen> {
         }).toList();
         _loading = false;
       });
-    } catch (_) {
-      if (mounted) setState(() { _loading = false; _error = 'डेटा मिळाला नाही. Flask server चालू आहे का?'; });
+    } catch (e) {
+      if (mounted) setState(() { _loading = false; _error = 'Error: $e'; });
     }
   }
 
@@ -106,7 +108,7 @@ class _BazaarScreenState extends State<BazaarScreen> {
     }
     if (found != null) {
       setState(() => _pinnedCrop = found);
-      _speakCropPrice(found!);
+      _speakCropPrice(found);
     }
   }
 
@@ -165,10 +167,13 @@ class _BazaarScreenState extends State<BazaarScreen> {
             ]),
           ),
           const SizedBox(height: 8),
-          VoiceMicBar(
-            tts: _tts,
-            hintText: 'बोला: "ज्वारी भाव" किंवा "कापूस"',
-            onResult: _handleVoice,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: VoiceMicBar(
+              tts: _tts,
+              hintText: 'बोला: "ज्वारी भाव" किंवा "कापूस"',
+              onResult: _handleVoice,
+            ),
           ),
           const SizedBox(height: 6),
           // Pinned crop popup card
@@ -198,7 +203,7 @@ class _BazaarScreenState extends State<BazaarScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+            colors: [Color(0xFF00695C), Color(0xFF00897B)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -360,7 +365,7 @@ class _BazaarScreenState extends State<BazaarScreen> {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+          colors: [Color(0xFF00695C), Color(0xFF00897B)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import '../utils/api_client.dart';
+import '../utils/app_config.dart';
 import '../utils/polly_tts.dart';
 import '../widgets/voice_mic_bar.dart';
 
@@ -55,8 +56,8 @@ class _CropsScreenState extends State<CropsScreen> {
   bool _loading = false;
   String _activeTopic = 'रोग';
 
-  static const _green = Color(0xFF1B5E20);
-  static const _cream = Color(0xFFF3F1E7);
+  static const _green = Color(0xFF00897B);
+  static const _cream = Color(0xFFF5F7F6);
 
   static const _topics = [
     {'key': 'रोग',  'icon': Icons.bug_report,  'label': 'रोग'},
@@ -84,9 +85,8 @@ class _CropsScreenState extends State<CropsScreen> {
     if (_adviceCache.containsKey(cacheKey)) return;
     setState(() => _loading = true);
     try {
-      final res = await http.post(
-        Uri.parse('http://10.144.10.112:5000/query'),
-        headers: {'Content-Type': 'application/json'},
+      final res = await apiPost(
+        '$kBaseUrl/query',
         body: json.encode({'query': '$cropKey $topic'}),
       );
       final payload = json.decode(res.body) as Map<String, dynamic>;
@@ -316,7 +316,7 @@ class _CropsScreenState extends State<CropsScreen> {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+          colors: [Color(0xFF00695C), Color(0xFF00897B)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

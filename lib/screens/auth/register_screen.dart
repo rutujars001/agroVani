@@ -262,7 +262,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _label('राज्य'),
           const SizedBox(height: 6),
           DropdownButtonFormField<String>(
-            value: _selectedState,
+            initialValue: _selectedState,
             decoration: InputDecoration(
               filled: true,
               fillColor: const Color(0xFFF5F5F5),

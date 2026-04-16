@@ -3,11 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'app_config.dart';
 
 /// Drop-in TTS helper.
 /// Tries Amazon Polly (/speak) first; falls back to FlutterTts on any error.
 class PollyTts {
-  static const _speakUrl = 'http://10.144.10.112:5000/speak';
+  static const _speakUrl = '$kBaseUrl/speak';
 
   final AudioPlayer _player   = AudioPlayer();
   final FlutterTts  _fallback = FlutterTts();
@@ -20,7 +21,7 @@ class PollyTts {
       final res = await http
           .post(
             Uri.parse(_speakUrl),
-            headers: {'Content-Type': 'application/json'},
+            headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true'},
             body: json.encode({'text': text}),
           )
           .timeout(const Duration(seconds: 10));

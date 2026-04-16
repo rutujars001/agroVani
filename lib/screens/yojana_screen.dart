@@ -13,8 +13,8 @@ class _YojanaScreenState extends State<YojanaScreen> {
   final TextEditingController _search = TextEditingController();
   final Set<String> _expanded = {};
 
-  static const _green = Color(0xFF1B5E20);
-  static const _cream = Color(0xFFF3F1E7);
+  static const _green = Color(0xFF00897B);
+  static const _cream = Color(0xFFF5F7F6);
 
   static const _yojanas = [
     {
@@ -182,10 +182,13 @@ class _YojanaScreenState extends State<YojanaScreen> {
             ),
           ),
           // Voice bar
-          VoiceMicBar(
-            tts: _tts,
-            hintText: 'बोला: "पीक विमा" किंवा "किसान कार्ड"',
-            onResult: _handleVoice,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: VoiceMicBar(
+              tts: _tts,
+              hintText: 'बोला: "पीक विमा" किंवा "किसान कार्ड"',
+              onResult: _handleVoice,
+            ),
           ),
           // List
           Expanded(
@@ -296,7 +299,7 @@ class _YojanaScreenState extends State<YojanaScreen> {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+          colors: [Color(0xFF00695C), Color(0xFF00897B)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

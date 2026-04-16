@@ -18,8 +18,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String _result = '';
   bool _calculated = false;
 
-  static const _green = Color(0xFF1B5E20);
-  static const _cream = Color(0xFFF3F1E7);
+  static const _green = Color(0xFF00897B);
+  static const _cream = Color(0xFFF5F7F6);
 
   // kg per acre for each crop × fertilizer
   static const _doses = <String, Map<String, double>>{
@@ -328,7 +328,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+          colors: [Color(0xFF00695C), Color(0xFF00897B)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
