@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import '../utils/api_client.dart';
 
 import '../utils/app_config.dart';
@@ -14,6 +13,7 @@ import 'crops_screen.dart';
 import 'krushi_doctor.dart';
 import 'mandi_price.dart';
 import 'news_detail_screen.dart';
+import 'pik_rog_scanner.dart';
 import 'profile_screen.dart';
 import 'weather_screen.dart';
 import 'yojana_screen.dart';
@@ -28,7 +28,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   static const Color _teal = Color(0xFF00897B);
   static const Color _bg = Color(0xFFF5F7F6);
-  static const String _weatherApiKey = '482a3a616b59b6ad77409e8aed90da11';
 
   final PollyTts _tts = PollyTts();
 
@@ -165,25 +164,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchWeather() async {
     try {
-      final response = await http.get(
-        Uri.parse(
-          'https://api.openweathermap.org/data/2.5/weather?q=$_userVillage&appid=$_weatherApiKey&units=metric',
-        ),
+      final response = await apiPost(
+        '$kBaseUrl/query',
+        body: json.encode({'query': 'havaman $_userVillage'}),
       );
-
-      final data = json.decode(response.body) as Map<String, dynamic>;
-
+      final payload = json.decode(response.body) as Map<String, dynamic>;
+      final text = (payload['fulfillmentText'] ?? '').toString();
+      // Parse temp and humidity from the Marathi response text
+      final tempMatch = RegExp(r'(\d+(?:\.\d+)?)°C').firstMatch(text);
+      final humidMatch = RegExp(r'आर्द्रता (\d+)%').firstMatch(text);
       if (!mounted) return;
-
       setState(() {
-        _temp = ((data['main']?['temp'] ?? 0) as num).toDouble();
-        _humidity = (data['main']?['humidity'] ?? 0) as int;
-        _condition = ((data['weather'] as List?)?.isNotEmpty ?? false)
-            ? data['weather'][0]['main'].toString()
-            : '';
+        _temp = tempMatch != null ? double.tryParse(tempMatch.group(1)!) ?? 0 : 0;
+        _humidity = humidMatch != null ? int.tryParse(humidMatch.group(1)!) ?? 0 : 0;
+        _condition = text.contains('पाऊस') ? 'Rain' : text.contains('ढग') ? 'Clouds' : 'Clear';
         _loadingWeather = false;
       });
-
       _prepareRecentActions();
     } catch (_) {
       if (!mounted) return;
@@ -770,6 +766,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         const KrushiDoctor(),
                         const Color(0xFFFCE4EC),
                         const Color(0xFFE91E63),
+                      ),
+                      _serviceCard(
+                        '🔬',
+                        'रोग स्कॅनर',
+                        const PikRogScanner(),
+                        const Color(0xFFE8EAF6),
+                        const Color(0xFF283593),
                       ),
                       _serviceCard(
                         '🌾',

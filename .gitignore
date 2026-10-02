@@ -30,6 +30,7 @@ android/app/debug/
 android/app/profile/
 android/app/release/
 android/.kotlin/
+android/app/google-services.json
 
 # iOS / macOS
 ios/Pods/

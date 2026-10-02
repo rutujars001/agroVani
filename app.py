@@ -14,8 +14,9 @@ load_dotenv()
 
 app = Flask(__name__)
 
-WEATHER_API_KEY = '482a3a616b59b6ad77409e8aed90da11'
-MANDI_API_KEY = '579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b'
+WEATHER_API_KEY = os.getenv('WEATHER_API_KEY')
+MANDI_API_KEY   = os.getenv('MANDI_API_KEY')
+NEWS_API_KEY    = os.getenv('NEWS_API_KEY')
 DISEASE_KB_FILE = 'crop_disease_knowledge.json'
 
 _polly = boto3.client(
@@ -74,6 +75,15 @@ _CROP_MAP = {
     'डाळिंब': 'Pomegranate', 'द्राक्षे': 'Grape',
     'कापसाच्या': 'Cotton', 'कापसाला': 'Cotton', 'कापसावर': 'Cotton', 'कांद्याच्या': 'Onion',
     'टोमॅटोच्या': 'Tomato', 'गव्हाच्या': 'Wheat', 'ज्वारीच्या': 'Jowar', 'सोयाबीनच्या': 'Soybean',
+    'उसाचे': 'Sugarcane', 'उसाच्या': 'Sugarcane', 'उसावर': 'Sugarcane', 'उसाला': 'Sugarcane',
+    'तुरीचे': 'Tur', 'तुरीच्या': 'Tur', 'तुरीवर': 'Tur',
+    'हरभऱ्याच्या': 'Gram', 'हरभऱ्यावर': 'Gram', 'हरभऱ्याचे': 'Gram',
+    'मक्याच्या': 'Maize', 'मक्यावर': 'Maize', 'मक्याचे': 'Maize',
+    'बाजरीच्या': 'Bajra', 'बाजरीवर': 'Bajra',
+    'शेंगदाण्याच्या': 'Groundnut', 'शेंगदाण्यावर': 'Groundnut',
+    'सूर्यफुलाच्या': 'Sunflower', 'सूर्यफुलावर': 'Sunflower',
+    'डाळिंबाच्या': 'Pomegranate', 'डाळिंबावर': 'Pomegranate',
+    'द्राक्षाच्या': 'Grape', 'द्राक्षावर': 'Grape',
 }
 
 _topic_map = {
@@ -408,7 +418,7 @@ def _build_reply(intent, param, query_text=''):
 def agri_news():
     try:
         url = 'https://newsapi.org/v2/top-headlines'
-        params = {'category': 'science', 'country': 'in', 'pageSize': 3, 'apiKey': '0fabec243c9e4edebe93e06efef0005d'}
+        params = {'category': 'science', 'country': 'in', 'pageSize': 3, 'apiKey': NEWS_API_KEY}
         res = requests.get(url, params=params, timeout=6, headers={'User-Agent': 'Mozilla/5.0', 'X-Forwarded-For': '127.0.0.1'}).json()
         articles = res.get('articles', [])
         if not articles:

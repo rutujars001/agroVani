@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/polly_tts.dart';
 import 'home_screen.dart';
 import 'crops_screen.dart';
 import 'krushi_doctor.dart';
@@ -16,6 +17,7 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   late int _currentIndex;
   static const _teal = Color(0xFF00897B);
+  final PollyTts _tts = PollyTts();
 
   final List<Widget> _pages = const [
     HomeScreen(),
@@ -29,6 +31,15 @@ class _MainNavigationState extends State<MainNavigation> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    Future.delayed(const Duration(milliseconds: 800), () {
+      _tts.speak('AgroVani मध्ये आपले स्वागत आहे.');
+    });
+  }
+
+  @override
+  void dispose() {
+    _tts.dispose();
+    super.dispose();
   }
 
   @override

@@ -16,7 +16,9 @@ class PollyTts {
   // ── Public API ────────────────────────────────────────────────────────
   Future<void> speak(String text) async {
     if (text.trim().isEmpty) return;
-    await stop();
+    // Stop without awaiting to avoid blocking
+    _player.stop();
+    _fallback.stop();
     try {
       final res = await http
           .post(
@@ -24,7 +26,7 @@ class PollyTts {
             headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true'},
             body: json.encode({'text': text}),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 6));
 
       if (res.statusCode == 200) {
         final payload = json.decode(res.body) as Map<String, dynamic>;
@@ -55,7 +57,7 @@ class PollyTts {
   // ── Fallback ──────────────────────────────────────────────────────────
   Future<void> _speakFallback(String text) async {
     await _fallback.setLanguage('mr-IN');
-    await _fallback.setSpeechRate(0.45);
+    await _fallback.setSpeechRate(0.5);
     await _fallback.setPitch(1.0);
     await _fallback.speak(text);
   }

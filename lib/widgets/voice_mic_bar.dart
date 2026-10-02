@@ -59,6 +59,8 @@ class _VoiceMicBarState extends State<VoiceMicBar> {
 
   Future<void> _initSpeech() async {
     try {
+      // Stop any existing session before initializing
+      await _speech.stop();
       final available = await _speech.initialize(
         onStatus: _onSpeechStatus,
         onError: (_) {
